@@ -1,16 +1,17 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomePage from '../components/HomePage.vue'
+// import HomePage from '../components/HomePage.vue'
 import Login from '../components/LoginComponent.vue'
 import Register from '../components/RegisterComponent.vue'
 import Messages from '../components/MessagesComponent.vue'
 import TaskFeed from '../components/TaskFeed.vue'
 import Profile from '../components/ProfileComponent.vue'
+import HomeLayout from '@/components/HomeLayOut.vue'
 
 const routes = [
   {
     path: '/',
-    name: 'HomePage',
-    component: HomePage,
+    name: 'Home',
+    component: HomeLayout,
     meta: { requiresAuth: true }
   },
   {
