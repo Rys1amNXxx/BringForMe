@@ -1,53 +1,54 @@
 <template>
-  <el-container class="home-layout" style="height: 100vh;">
-    <!-- 左侧导航 -->
+  <!-- 高度设置为 100vh，填满可视区域 -->
+  <el-container style="height: 100vh;">
+    
+    <!-- 左侧导航栏 -->
     <el-aside width="240px" class="aside-bar">
-      <!-- 用户信息区 -->
-      <div class="profile-section">
+      <!-- 用户信息区，点击头像或名字跳转到个人中心 -->
+      <div class="profile-section" @click="goToProfile" style="cursor: pointer;">
         <el-avatar :size="60" src="https://via.placeholder.com/60" />
         <p>TOM</p>
       </div>
-      <!-- 导航菜单 -->
+
+      <!-- 导航菜单，可根据需要增减 -->
       <el-menu
         default-active="1"
         class="el-menu-vertical-demo"
         router
       >
-        <el-menu-item index="1">
+        <el-menu-item index="/">
           <el-icon style="margin-right: 8px;">
             <i class="el-icon-house"></i>
           </el-icon>
-          <span>Home</span>
+          <router-link to="/" style="color: inherit;">Home</router-link>
         </el-menu-item>
-        <el-menu-item index="2">
+        <el-menu-item index="/messages">
           <el-icon style="margin-right: 8px;">
             <i class="el-icon-message"></i>
           </el-icon>
-          <span>Messages</span>
+          <router-link to="/messages" style="color: inherit;">Messages</router-link>
         </el-menu-item>
       </el-menu>
     </el-aside>
 
-    <!-- 右侧主区域 -->
-    <el-container>
-      <!-- 顶部发帖区 -->
-      <el-header height="auto" class="header-bar">
-        <div class="post-box">
-          <el-input
-            type="textarea"
-            placeholder="What's happening?"
-            v-model="newPostContent"
-            :autosize="{ minRows: 1, maxRows: 4 }"
-            style="width: 100%;"
-          />
-          <div class="post-actions">
-            <el-button type="primary" @click="handlePost">Post</el-button>
-          </div>
+    <!-- 右侧主内容区 -->
+    <el-main class="main-content">
+      <!-- 发帖输入区（示例） -->
+      <div class="post-box">
+        <el-input
+          type="textarea"
+          placeholder="What's happening?"
+          v-model="newPostContent"
+          :autosize="{ minRows: 1, maxRows: 4 }"
+          style="width: 100%;"
+        />
+        <div class="post-actions">
+          <el-button type="primary" @click="handlePost">Post</el-button>
         </div>
-      </el-header>
+      </div>
 
-      <!-- 帖子列表区 -->
-      <el-main class="post-list">
+      <!-- 帖子列表（示例） -->
+      <div class="post-list">
         <div
           v-for="post in posts"
           :key="post.id"
@@ -83,15 +84,18 @@
             <el-button size="small" type="success">Accept</el-button>
           </div>
         </div>
-      </el-main>
-    </el-container>
+      </div>
+    </el-main>
   </el-container>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
-// 模拟发帖内容
+const router = useRouter()
+
+// 发帖输入
 const newPostContent = ref('')
 
 // 模拟帖子数据
@@ -108,39 +112,36 @@ const posts = ref([
     user: { name: 'Name', avatar: 'https://via.placeholder.com/40' },
     time: '29m',
     content: 'Just another post to show how it looks without an image.'
-    // image: ''  // 没有图片
   }
 ])
 
+// 发帖动作（示例）
 function handlePost() {
   if (newPostContent.value.trim()) {
-    // 这里可以调用后端接口，或本地 push 一条新的帖子
     posts.value.unshift({
       id: Date.now(),
       user: { name: 'TOM', avatar: 'https://via.placeholder.com/40' },
       time: 'now',
-      content: newPostContent.value,
-      image: ''
+      content: newPostContent.value
     })
     newPostContent.value = ''
   }
 }
+
+// 点击头像或名字跳转到个人中心
+function goToProfile() {
+  router.push('/profile')
+}
 </script>
 
 <style scoped>
-.home-layout {
-  /* 确保父容器 100vh, 填满页面 */
-  width: 100%;
-  margin: 0;
-  padding: 0;
-}
-
 .aside-bar {
   background-color: #f8f8f8;
   border-right: 1px solid #ddd;
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 10px 0;
 }
 
 .profile-section {
@@ -153,42 +154,43 @@ function handlePost() {
   font-weight: bold;
 }
 
-/* 顶部发帖区 */
-.header-bar {
-  background-color: #fff;
-  border-bottom: 1px solid #ddd;
-  padding: 10px;
-}
-
-.post-box {
+/* 右侧主内容区 */
+.main-content {
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  align-items: center;
+}
+
+/* 发帖区 */
+.post-box {
   width: 100%;
   max-width: 600px;
-  margin: 0 auto;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  margin-bottom: 20px;
 }
 
 .post-actions {
   text-align: right;
+  margin-top: 8px;
 }
 
 /* 帖子列表 */
 .post-list {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* 居中对齐，可按需调整 */
-}
-
-.post-item {
   width: 100%;
   max-width: 600px;
+}
+
+/* 单条帖子样式 */
+.post-item {
+  background-color: #fff;
   border: 1px solid #eee;
   border-radius: 4px;
   padding: 10px;
   margin-bottom: 20px;
-  background-color: #fff;
 }
 
 .post-header {
