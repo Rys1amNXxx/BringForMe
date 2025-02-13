@@ -1,16 +1,13 @@
 <template>
-  <!-- 高度设置为 100vh，填满可视区域 -->
   <el-container style="height: 100vh;">
     
-    <!-- 左侧导航栏 -->
+    <!-- Leftside Menu-->
     <el-aside width="240px" class="aside-bar">
-      <!-- 用户信息区，点击头像或名字跳转到个人中心 -->
       <div class="profile-section" @click="goToProfile" style="cursor: pointer;">
         <el-avatar :size="60" src="https://via.placeholder.com/60" />
         <p>TOM</p>
       </div>
 
-      <!-- 导航菜单，可根据需要增减 -->
       <el-menu
         default-active="1"
         class="el-menu-vertical-demo"
@@ -31,9 +28,9 @@
       </el-menu>
     </el-aside>
 
-    <!-- 右侧主内容区 -->
+    <!-- Main Content -->
     <el-main class="main-content">
-      <!-- 发帖输入区（示例） -->
+      <!-- Post Box -->
       <div class="post-box">
         <el-input
           type="textarea"
@@ -47,14 +44,13 @@
         </div>
       </div>
 
-      <!-- 帖子列表（示例） -->
+      <!-- Post List -->
       <div class="post-list">
         <div
           v-for="post in posts"
           :key="post.id"
           class="post-item"
         >
-          <!-- 帖子头部：头像、用户名、时间 -->
           <div class="post-header">
             <el-avatar
               :size="40"
@@ -67,7 +63,7 @@
             </div>
           </div>
 
-          <!-- 帖子内容：文字 + 图片（可选） -->
+          <!-- Content of the post -->
           <div class="post-content">
             <p>{{ post.content }}</p>
             <img
@@ -78,7 +74,6 @@
             />
           </div>
 
-          <!-- 帖子操作按钮 -->
           <div class="post-footer">
             <el-button size="small">Contact Now</el-button>
             <el-button size="small" type="success">Accept</el-button>
@@ -94,11 +89,8 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-
-// 发帖输入
 const newPostContent = ref('')
 
-// 模拟帖子数据
 const posts = ref([
   {
     id: 1,
@@ -115,7 +107,6 @@ const posts = ref([
   }
 ])
 
-// 发帖动作（示例）
 function handlePost() {
   if (newPostContent.value.trim()) {
     posts.value.unshift({
@@ -128,7 +119,6 @@ function handlePost() {
   }
 }
 
-// 点击头像或名字跳转到个人中心
 function goToProfile() {
   router.push('/profile')
 }
@@ -154,7 +144,6 @@ function goToProfile() {
   font-weight: bold;
 }
 
-/* 右侧主内容区 */
 .main-content {
   padding: 20px;
   display: flex;
@@ -162,7 +151,6 @@ function goToProfile() {
   align-items: center;
 }
 
-/* 发帖区 */
 .post-box {
   width: 100%;
   max-width: 600px;
@@ -178,13 +166,11 @@ function goToProfile() {
   margin-top: 8px;
 }
 
-/* 帖子列表 */
 .post-list {
   width: 100%;
   max-width: 600px;
 }
 
-/* 单条帖子样式 */
 .post-item {
   background-color: #fff;
   border: 1px solid #eee;
