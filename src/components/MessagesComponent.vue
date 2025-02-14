@@ -1,7 +1,8 @@
 <template>
   <el-container style="height: 100vh;">
     <el-aside width="240px" class="aside-bar">
-      <div class="profile-section">
+
+      <div class="profile-section" @click="goToProfile" style="cursor: pointer;">
         <el-avatar :size="60" src="https://via.placeholder.com/60" />
         <p>TOM</p>
       </div>
@@ -71,6 +72,7 @@
 
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 
 const contacts = ref([
   { id: 1, name: 'Jack' },
@@ -79,7 +81,7 @@ const contacts = ref([
 ])
 
 const selectedContactId = ref(null)
-
+const router = useRouter()
 const messagesMap = ref({
   1: [
     {
@@ -132,6 +134,10 @@ function selectContact(contact) {
   nextTick(() => {
     scrollToBottom()
   })
+}
+
+function goToProfile() {
+  router.push('/profile')
 }
 
 function sendMessage() {

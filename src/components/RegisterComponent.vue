@@ -7,7 +7,7 @@
           <el-input v-model="registerForm.email" placeholder="Enter your e-mail"></el-input>
         </el-form-item>
         <el-form-item label="Password" prop="password">
-          <el-input type="password" v-model="registerForm.password" placeholder="请输入密码"></el-input>
+          <el-input type="password" v-model="registerForm.password" placeholder="Enter your password"></el-input>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleRegister">Register</el-button>
