@@ -5,7 +5,7 @@ import Register from '../components/RegisterComponent.vue'
 import Messages from '../components/MessagesComponent.vue'
 import TaskFeed from '../components/TaskFeed.vue'
 import Profile from '../components/ProfileComponent.vue'
-import HomeLayout from '@/components/HomeLayOut.vue'
+import HomeLayout from '@/components/HomeLayout.vue'
 
 const routes = [
   {
