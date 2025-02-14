@@ -3,6 +3,7 @@
     
     <!-- Leftside Menu-->
     <el-aside width="240px" class="aside-bar">
+
       <div class="profile-section" @click="goToProfile" style="cursor: pointer;">
         <el-avatar :size="60" src="https://via.placeholder.com/60" />
         <p>TOM</p>
@@ -26,6 +27,11 @@
           <router-link to="/messages" style="color: inherit;">Messages</router-link>
         </el-menu-item>
       </el-menu>
+
+      <div class="logout-section">
+        <el-button type="danger" @click="handleLogout">Log Out</el-button>
+      </div>
+
     </el-aside>
 
     <!-- Main Content -->
@@ -122,6 +128,12 @@ function handlePost() {
 function goToProfile() {
   router.push('/profile')
 }
+
+function handleLogout() {
+  localStorage.removeItem('user')
+  router.push('/login')
+}
+
 </script>
 
 <style scoped>
@@ -208,5 +220,12 @@ function goToProfile() {
 .post-footer {
   display: flex;
   gap: 10px;
+}
+
+.logout-section {
+  margin-top: auto;
+  display: flex;
+  justify-content: center;
+  width: 20px;
 }
 </style>
