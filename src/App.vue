@@ -10,6 +10,9 @@ export default {
 
 <style>
 html,body,#app {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin: 0;
   padding: 0;
   height: 100%;
