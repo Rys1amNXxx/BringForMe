@@ -98,9 +98,7 @@ function handleLogin() {
 
 .login-card {
   width: 400px;
-  /* 卡片宽度，可自行调整 */
   text-align: center;
-  /* 让表单文字居中 */
 }
 
 .el-form-item {
