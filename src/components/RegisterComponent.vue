@@ -1,7 +1,16 @@
 <template>
   <div class="register-container">
+
+    <div class="logo-section">
+      <img src="@/assets/runner-icon.png" alt="Runner" class="runner-icon" />
+      <h1>Bring For Me</h1>
+      <img src="@/assets/shopping-bag-icon.png" alt="Shopping Bag" class="bag-icon" />
+    </div>
+
+    <br />
+    <br />
+
     <el-card class="register-card">
-      <h2 style="text-align: center;">Register</h2>
       <el-form :model="registerForm" :rules="rules" ref="registerFormRef">
         <el-form-item label="E-mail" prop="email">
           <el-input v-model="registerForm.email" placeholder="Enter your e-mail"></el-input>
@@ -52,13 +61,37 @@ function handleRegister() {
 
 <style scoped>
 .register-container {
+  background-color: white;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 100vh;
 }
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  height: 30px;
+}
+
 .register-card {
   width: 400px;
-  padding: 20px;
+  text-align: center;
 }
+
+.runner-icon {
+  margin-right: 10px;
+}
+
+.bag-icon {
+  margin-left: 10px;
+}
+
+.runner-icon,
+.bag-icon {
+  width: 50px;
+  height: 50px;
+}
+
 </style>
