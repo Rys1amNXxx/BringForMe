@@ -83,4 +83,5 @@ function handleLogout() {
   flex-direction: column;
   align-items: center;
 }
+
 </style>
