@@ -1,102 +1,44 @@
 <template>
-  <el-container style="height: 100vh;">
-    
-    <!-- Leftside Menu-->
-    <el-aside width="240px" class="aside-bar">
-
-      <div class="profile-section" @click="goToProfile" style="cursor: pointer;">
-        <el-avatar :size="60" src="https://via.placeholder.com/60" />
-        <p>TOM</p>
+  <!-- Post Box -->
+  <el-container class="main-content">
+    <div class="post-box">
+      <el-input type="textarea" placeholder="What's happening?" v-model="newPostContent"
+        :autosize="{ minRows: 1, maxRows: 4 }" style="width: 100%;" />
+      <div class="post-actions">
+        <el-button type="primary" @click="handlePost">Post</el-button>
       </div>
+    </div>
 
-      <el-menu
-        default-active="1"
-        class="el-menu-vertical-demo"
-        router
-      >
-        <el-menu-item index="/">
-          <el-icon style="margin-right: 8px;">
-            <i class="el-icon-house"></i>
-          </el-icon>
-          <router-link to="/" style="color: inherit;">Home</router-link>
-        </el-menu-item>
-        <el-menu-item index="/messages">
-          <el-icon style="margin-right: 8px;">
-            <i class="el-icon-message"></i>
-          </el-icon>
-          <router-link to="/messages" style="color: inherit;">Messages</router-link>
-        </el-menu-item>
-      </el-menu>
-
-      <div class="logout-section">
-        <el-button type="danger" @click="handleLogout">Log Out</el-button>
-      </div>
-
-    </el-aside>
-
-    <!-- Main Content -->
-    <el-main class="main-content">
-      <!-- Post Box -->
-      <div class="post-box">
-        <el-input
-          type="textarea"
-          placeholder="What's happening?"
-          v-model="newPostContent"
-          :autosize="{ minRows: 1, maxRows: 4 }"
-          style="width: 100%;"
-        />
-        <div class="post-actions">
-          <el-button type="primary" @click="handlePost">Post</el-button>
-        </div>
-      </div>
-
-      <!-- Post List -->
-      <div class="post-list">
-        <div
-          v-for="post in posts"
-          :key="post.id"
-          class="post-item"
-        >
-          <div class="post-header">
-            <el-avatar
-              :size="40"
-              :src="post.user.avatar"
-              style="margin-right: 10px;"
-            />
-            <div class="post-user">
-              <strong>{{ post.user.name }}</strong>
-              <span class="post-time">{{ post.time }}</span>
-            </div>
-          </div>
-
-          <!-- Content of the post -->
-          <div class="post-content">
-            <p>{{ post.content }}</p>
-            <img
-              v-if="post.image"
-              :src="post.image"
-              alt="Post Image"
-              class="post-image"
-            />
-          </div>
-
-          <div class="post-footer">
-            <el-button size="small">Contact Now</el-button>
-            <el-button size="small" type="success">Accept</el-button>
+    <!-- Post List -->
+    <div class="post-list">
+      <div v-for="post in posts" :key="post.id" class="post-item">
+        <div class="post-header">
+          <el-avatar :size="40" :src="post.user.avatar" style="margin-right: 10px;" />
+          <div class="post-user">
+            <strong>{{ post.user.name }}</strong>
+            <span class="post-time">{{ post.time }}</span>
           </div>
         </div>
+
+        <!-- Content of the post -->
+        <div class="post-content">
+          <p>{{ post.content }}</p>
+          <img v-if="post.image" :src="post.image" alt="Post Image" class="post-image" />
+        </div>
+
+        <div class="post-footer">
+          <el-button size="small">Contact Now</el-button>
+          <el-button size="small" type="success">Accept</el-button>
+        </div>
       </div>
-    </el-main>
+    </div>
   </el-container>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 
-const router = useRouter()
 const newPostContent = ref('')
-
 const posts = ref([
   {
     id: 1,
@@ -125,27 +67,9 @@ function handlePost() {
   }
 }
 
-function goToProfile() {
-  router.push('/profile')
-}
-
-function handleLogout() {
-  localStorage.removeItem('user')
-  router.push('/login')
-}
-
 </script>
 
 <style scoped>
-.aside-bar {
-  background-color: #f8f8f8;
-  border-right: 1px solid #ddd;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px 0;
-}
-
 .profile-section {
   text-align: center;
   margin: 20px 0;
@@ -220,12 +144,5 @@ function handleLogout() {
 .post-footer {
   display: flex;
   gap: 10px;
-}
-
-.logout-section {
-  margin-top: auto;
-  display: flex;
-  justify-content: center;
-  width: 20px;
 }
 </style>

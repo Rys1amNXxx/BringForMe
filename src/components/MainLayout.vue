@@ -1,13 +1,15 @@
 <template>
-  <el-countainer style="height:100vh">
+  <el-container style="height:100vh">
+
     <el-aside width="240px" class="aside-bar">
-      <div class="profile-section">
+
+      <div class="profile-section" @click="goToProfile" style="cursor: pointer;">
         <el-avatar :size="60" src="https://via.placeholder.com/60" />
         <p>TOM</p>
       </div>
 
       <el-menu default-active="home" router>
-        <el-menu-item index="home">
+        <el-menu-item index="/">
           <el-icon style="margin-right:8px">
             <i class="el-icon-house"></i>
           </el-icon>
@@ -21,12 +23,6 @@
         <router-link to="/messages" style="color: inherit;">Messages</router-link>
       </el-menu-item>
 
-      <el-menu-item index="profile">
-        <el-icon style="margin-right: 8px;">
-          <i class="el-icon-user"></i>
-        </el-icon> 
-        <router-link to="/profile" style="color: inherit;">Profile</router-link>
-      </el-menu-item>
       </el-menu>
 
       <div class="logout-section">
@@ -34,10 +30,10 @@
       </div>
     </el-aside>
 
-    <el-menu class="main-content">
+    <el-main class="main-content">
       <router-view />
-    </el-menu>
-  </el-countainer>
+    </el-main>
+  </el-container>
 </template>
 
 <script setup>
@@ -48,6 +44,10 @@ const router = useRouter()
 function handleLogout() {
   localStorage.removeItem('user')
   router.push({name: 'Login'})
+}
+
+function goToProfile() {
+  router.push('/profile')
 }
 </script>
 
@@ -75,13 +75,15 @@ function handleLogout() {
 .logout-section {
   margin-top: auto;
   padding-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  width: 20px;
 }
 
 .main-content {
-  padding: 20px;
+  flex: 1;
+  width: 100%;
   display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
 </style>
