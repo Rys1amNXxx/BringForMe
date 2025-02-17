@@ -60,11 +60,7 @@ function handleLogin() {
     }
   })
 }
-
-// function goToSignUp() {
-//   router.push('/register')
-// }
-// </script>
+</script>
 
 <style scoped>
 .login-container {
