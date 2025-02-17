@@ -3,14 +3,14 @@
     <!-- LOGO -->
     <div class="logo-section">
       <img src="@/assets/runner-icon.png" alt="Runner" class="runner-icon" />
-      <h1>Bring For Me</h1>
+      <h1 style="font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">Bring For Me</h1>
       <img src="@/assets/shopping-bag-icon.png" alt="Shopping Bag" class="bag-icon" />
     </div>
 
     <!-- Login -->
     <el-card class="login-card">
       <el-form :model="loginForm" :rules="rules" ref="loginFormRef">
-        <el-form-item label="Email" prop="email">
+        <el-form-item label="E-mail" prop="email">
           <el-input v-model="loginForm.email" placeholder="Enter your e-mail"></el-input>
         </el-form-item>
         <el-form-item label="Password" prop="password">
@@ -68,8 +68,8 @@ function handleLogin() {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  background-color: #fff;
+  min-height: 100vh;
+  background-color: white;
 }
 
 .logo-section {

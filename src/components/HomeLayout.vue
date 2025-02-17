@@ -2,8 +2,22 @@
   <!-- Post Box -->
   <el-container class="main-content">
     <div class="post-box">
-      <el-input type="textarea" placeholder="What's happening?" v-model="newPostContent"
+      <el-input type="textarea" resize="none" placeholder="What's happening?" v-model="newPostContent"
         :autosize="{ minRows: 1, maxRows: 4 }" style="width: 100%;" />
+        <el-upload 
+        class="upload-demo"
+        action="http://localhost:3000/api/upload"
+        :headers="UploadHeaders"
+        :on-success="handleUploadSuccess"
+        :on-remove="handleRemove"
+        :file-list="fileList"
+        list-type="picture-card"
+        name="file"
+        :limit="1"
+        :on-exceed="handleExceed"
+        >
+        <i class="el-icon-plus"></i>
+      </el-upload>
       <div class="post-actions">
         <el-button type="primary" @click="handlePost">Post</el-button>
       </div>
@@ -36,6 +50,7 @@
 </template>
 
 <script setup>
+
 import { ref } from 'vue'
 
 const newPostContent = ref('')
@@ -70,6 +85,10 @@ function handlePost() {
 </script>
 
 <style scoped>
+.upload-demo{
+  margin-top: 10px;
+}
+
 .profile-section {
   text-align: center;
   margin: 20px 0;

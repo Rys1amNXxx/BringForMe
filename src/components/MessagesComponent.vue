@@ -24,6 +24,7 @@
           <el-input
             type="textarea"
             v-model="newMessage"
+            resize="none"
             placeholder="Type your message..."
             @keyup.enter="sendMessage"
           ></el-input>

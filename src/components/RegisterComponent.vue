@@ -3,12 +3,10 @@
 
     <div class="logo-section">
       <img src="@/assets/runner-icon.png" alt="Runner" class="runner-icon" />
-      <h1>Bring For Me</h1>
+      <h1 style="font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">Bring For Me</h1>
       <img src="@/assets/shopping-bag-icon.png" alt="Shopping Bag" class="bag-icon" />
     </div>
 
-    <br />
-    <br />
 
     <el-card class="register-card">
       <el-form :model="registerForm" :rules="rules" ref="registerFormRef">
@@ -72,7 +70,7 @@ function handleRegister() {
 .logo-section {
   display: flex;
   align-items: center;
-  height: 30px;
+  margin-bottom: 30px;
 }
 
 .register-card {
