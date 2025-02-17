@@ -35,7 +35,7 @@
 
     <el-aside class="contact-selection">
       <div class="optional-header">
-        <h3>Contacts</h3>
+        <h3 style="font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">Contacts</h3>
       </div>
       <div class="contact-list">
         <div

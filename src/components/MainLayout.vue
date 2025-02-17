@@ -9,19 +9,21 @@
       </div>
 
       <el-menu default-active="home" router>
-        <el-menu-item index="/">
-          <el-icon style="margin-right:8px">
+        <el-menu-item index="/" style="width: 200px; font-size: large;font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">
+          <el-icon style="margin-right:30px">
             <i class="el-icon-house"></i>
           </el-icon>
-          <router-link to="/" style="color: inherit;">Home</router-link>
+          <!-- <router-link to="/" style="color: inherit;">Home</router-link> -->
+          Home
         </el-menu-item>
 
-        <el-menu-item index="messages">
-        <el-icon style="margin-right: 8px;">
-          <i class="el-icon-message"></i>
-        </el-icon>
-        <router-link to="/messages" style="color: inherit;">Messages</router-link>
-      </el-menu-item>
+        <el-menu-item index="messages" style="width: 200px; font-size: large;font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">
+          <el-icon style="margin-right:30px">
+            <i class="el-icon-message"></i>
+          </el-icon>
+          <!-- <router-link to="/messages" style="color: inherit;">Messages</router-link> -->
+          Messages
+        </el-menu-item>
 
       </el-menu>
 
@@ -43,7 +45,7 @@ const router = useRouter()
 
 function handleLogout() {
   localStorage.removeItem('user')
-  router.push({name: 'Login'})
+  router.push({ name: 'Login' })
 }
 
 function goToProfile() {
@@ -52,7 +54,6 @@ function goToProfile() {
 </script>
 
 <style scoped>
-
 .aside-bar {
   background-color: #f8f8f8;
   border-right: 1px solid #ddd;
@@ -85,5 +86,4 @@ function goToProfile() {
   width: 100%;
   display: flex;
 }
-
 </style>
