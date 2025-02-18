@@ -11,23 +11,15 @@
           <span class="chat-header-time">{{ currentTime }}</span>
         </div>
         <div class="chat-messages" ref="chatMessagesRef">
-          <div
-            v-for="(msg, index) in currentMessages"
-            :key="index"
-            :class="['chat-bubble', msg.sender === 'me' ? 'me' : 'them']"
-          >
+          <div v-for="(msg, index) in currentMessages" :key="index"
+            :class="['chat-bubble', msg.sender === 'me' ? 'me' : 'them']">
             <div class="chat-text">{{ msg.text }}</div>
             <div class="chat-time">{{ msg.time }}</div>
           </div>
         </div>
         <div class="chat-input">
-          <el-input
-            type="textarea"
-            v-model="newMessage"
-            resize="none"
-            placeholder="Type your message..."
-            @keyup.enter="sendMessage"
-          ></el-input>
+          <el-input type="textarea" v-model="newMessage" resize="none" placeholder="Type your message..."
+            @keyup.enter="sendMessage"></el-input>
           <el-button type="primary" @click="sendMessage">Send</el-button>
         </div>
       </div>
@@ -39,12 +31,8 @@
         <h3 style="font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">Contacts</h3>
       </div>
       <div class="contact-list">
-        <div
-          v-for="contact in contacts"
-          :key="contact.id"
-          :class="['contact-item', contact.id === selectedContactId ? 'active' : '']"
-          @click="selectContact(contact)"
-        >
+        <div v-for="contact in contacts" :key="contact.id"
+          :class="['contact-item', contact.id === selectedContactId ? 'active' : '']" @click="selectContact(contact)">
           <el-avatar :size="40" :src="contact.avatar" />
           <span>{{ contact.name }}</span>
         </div>
@@ -54,8 +42,10 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const contacts = ref([
   { id: 1, name: 'Jack', avatar: 'https://via.placeholder.com/40' },
   { id: 2, name: 'Anny', avatar: 'https://via.placeholder.com/40' },
@@ -132,6 +122,21 @@ function scrollToBottom() {
     el.scrollTop = el.scrollHeight
   }
 }
+
+onMounted(() => {
+  selectedContactId.value = contacts.value[0].id
+  if (route.query.newContact) {
+    try {
+      const newContact = JSON.parse(route.query.newContact)
+      if (!contacts.value.find(c => c.id === newContact.id)) {
+        contacts.value.push(newContact)
+      }
+    } catch (e) {
+      console.error('Invalid newContact query parameter.', e)
+    }
+  }
+})
+
 </script>
 
 <style scoped>
@@ -142,6 +147,7 @@ function scrollToBottom() {
   box-sizing: border-box;
   display: flex;
 }
+
 .chat-container {
   flex: 1;
   display: flex;
@@ -151,15 +157,17 @@ function scrollToBottom() {
   overflow-y: auto;
   width: 100%;
 }
+
 .no-chat-selected {
   text-align: center;
-  margin:auto;
+  margin: auto;
   font-size: 16px;
   color: #999;
 }
+
 .chat-content {
   width: 100%;
-  flex:  1;
+  flex: 1;
   padding: 0;
   margin: 0;
   box-sizing: border-box;
@@ -167,6 +175,7 @@ function scrollToBottom() {
   flex-direction: column;
   height: 100%;
 }
+
 .chat-header {
   border-bottom: 1px solid #ddd;
   padding-bottom: 10px;
@@ -175,10 +184,12 @@ function scrollToBottom() {
   justify-content: space-between;
   align-items: center;
 }
+
 .chat-header-time {
   font-size: 14px;
   color: #999;
 }
+
 .chat-messages {
   flex: 1;
   overflow-y: auto;
@@ -186,6 +197,7 @@ function scrollToBottom() {
   flex-direction: column;
   padding-right: 10px;
 }
+
 .chat-bubble {
   max-width: 80%;
   margin-bottom: 10px;
@@ -196,27 +208,33 @@ function scrollToBottom() {
   word-wrap: break-word;
   white-space: pre-wrap;
 }
+
 .me {
   align-self: flex-end;
   background-color: #e6f7ff;
 }
+
 .them {
   align-self: flex-start;
   background-color: #f2f2f2;
 }
+
 .chat-text {
   margin-bottom: 5px;
 }
+
 .chat-time {
   font-size: 12px;
   color: #999;
   text-align: right;
 }
+
 .chat-input {
   display: flex;
   gap: 10px;
   margin-top: 10px;
 }
+
 .chat-input .el-input {
   flex: 1;
 }
@@ -233,15 +251,18 @@ function scrollToBottom() {
   box-sizing: border-box;
   overflow-y: auto;
 }
+
 .optional-header {
   text-align: center;
   margin-bottom: 10px;
 }
+
 .contact-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
+
 .contact-item {
   display: flex;
   align-items: center;
@@ -251,9 +272,11 @@ function scrollToBottom() {
   border-radius: 4px;
   transition: background-color 0.2s;
 }
+
 .contact-item:hover {
   background-color: #e6f7ff;
 }
+
 .contact-item.active {
   background-color: #cbe6ff;
 }

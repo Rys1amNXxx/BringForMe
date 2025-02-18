@@ -5,21 +5,26 @@
       <el-input type="textarea" resize="none" placeholder="What's happening?" v-model="newPostContent"
         :autosize="{ minRows: 1, maxRows: 4 }" style="width: 100%;" />
         <el-upload 
-        class="upload-demo"
+        class="picture-upload"
+        v-model:file-list="fileList"
         action="http://localhost:3000/api/upload"
-        :headers="UploadHeaders"
+        list-type="picture"
+        :on-preview="handlePictureCardPreview"
+        :on-remove="handleUploadRemove"
         :on-success="handleUploadSuccess"
-        :on-remove="handleRemove"
-        :file-list="fileList"
-        list-type="picture-card"
-        name="file"
-        :limit="1"
-        :on-exceed="handleExceed"
+        :headers="uploadHeaders"
         >
-        <i class="el-icon-plus"></i>
+        <el-button type="primary">Upload</el-button>
+        <template #tip>
+          <div class="el-upload__tip" style="font-size:10px;">
+            jpg/png files with a size less than 500kb
+          </div>
+        </template>
       </el-upload>
+
+
       <div class="post-actions">
-        <el-button type="primary" @click="handlePost">Post</el-button>
+        <el-button type="primary" @click="handlePost" class="postButton">Post</el-button>
       </div>
     </div>
 
@@ -41,7 +46,7 @@
         </div>
 
         <div class="post-footer">
-          <el-button size="small">Contact Now</el-button>
+          <el-button size="small" type="primary" @click="contactNow(post)">Contact Now</el-button>
           <el-button size="small" type="success">Accept</el-button>
         </div>
       </div>
@@ -52,8 +57,17 @@
 <script setup>
 
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import {ElMessage} from 'element-plus'
+import axios from 'axios'
 
+const router = useRouter()
 const newPostContent = ref('')
+const newPostImageUrl = ref('')
+const fileList = ref([])
+const uploadHeaders = { 
+  // Authorization:'Bearer your token,' 
+}
 const posts = ref([
   {
     id: 1,
@@ -71,21 +85,86 @@ const posts = ref([
 ])
 
 function handlePost() {
-  if (newPostContent.value.trim()) {
-    posts.value.unshift({
-      id: Date.now(),
-      user: { name: 'TOM', avatar: 'https://via.placeholder.com/40' },
-      time: 'now',
-      content: newPostContent.value
+  // if (newPostContent.value.trim()) {
+  //   posts.value.unshift({
+  //     id: Date.now(),
+  //     user: { name: 'TOM', avatar: 'https://via.placeholder.com/40' },
+  //     time: 'now',
+  //     content: newPostContent.value
+  //   })
+  //   newPostContent.value = ''
+  // }
+  if (!newPostContent.value.trim()) {
+    ElMessage.warning('Empty content')
+    return
+  }
+
+
+  const postData = {
+    content: newPostContent.value,
+    imageUrl: newPostImageUrl.value,
+  }
+  axios.post('http://localhost:3000/api/tasks', postData)
+    .then((res) => {
+      if (res.data.success) {
+        ElMessage.success('Task posted successfully')
+        resetForm()
+      } else {
+        ElMessage.error(res.data.message || 'Failed to post task')
+      }
     })
-    newPostContent.value = ''
+    .catch((err) => {
+      console.error(err)
+      ElMessage.error('Failed to post task')
+    })
+}
+
+function contactNow(post) {
+  const newContact = {
+    id: Date.now(),
+    name: post.user.name,
+    avatar: post.user.avatar || 'https://via.placeholder.com/40'
+  }
+
+  router.push({
+    name:"Messages",
+    query:{ newContact: JSON.stringify(newContact)}
+  })
+}
+
+// eslint-disable-next-line no-unused-vars
+function handleUploadSuccess(response, _file, _fileListRef) {
+  console.log('Upload success:', response)
+  if (response.success && response.url) {
+    newPostImageUrl.value = response.url
+  } else {
+    ElMessage.error('Upload failed')
   }
 }
 
+// eslint-disable-next-line no-unused-vars
+function handleUploadRemove(file, _fileListRef) {
+  console.log('Remove file:', file)
+  newPostImageUrl.value = ''
+}
+
+function resetForm() {
+  newPostContent.value = ''
+  newPostImageUrl.value = ''
+  fileList.value = []
+}
 </script>
 
 <style scoped>
-.upload-demo{
+
+.postButton{
+  width: 100px;
+  height: 30px;
+  font-size: large;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+.picture-upload {
   margin-top: 10px;
 }
 
