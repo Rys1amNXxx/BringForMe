@@ -19,6 +19,9 @@
         <el-form-item label="Confirm Password" prop="confirmPassword">
           <el-input type="password" v-model="registerForm.confirmPassword" palceholder="Please confirm your password"></el-input>
         </el-form-item>
+        <el-form-item label="Nickname" prop="nickname">
+          <el-input v-model="registerForm.nickname" placeholder="Please enter your nickname"></el-input>
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleRegister">Register</el-button>
         </el-form-item>
@@ -33,12 +36,15 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import {ElMessage} from 'element-plus'
+import axios from 'axios'
 
 const router = useRouter()
 const registerForm = reactive({
   email: '',
   password: '',
-  confirmPassword: ''
+  confirmPassword: '',
+  nickname: ''
 })
 
 const registerFormRef = ref(null)
@@ -61,20 +67,49 @@ const rules = {
         return Promise.resolve()
       }
     }, trigger: 'blur' }
+  ],
+  nickname: [
+    { required: true, message: 'Please enter your nickname', trigger: 'blur' }
   ]
 }
 
 function handleRegister() {
   registerFormRef.value.validate((valid) => {
     if (valid) {
-      console.log("Register:", registerForm)
-      router.push({ name: 'Login' })
+      const registrationData = {
+        email: registerForm.email,
+        password: registerForm.password,
+        nickname: registerForm.nickname
+      }
+      axios.post ('http://localhost:3000/api/auth/register', registrationData)
+        .then(res => {
+          if(res.data.status === true){
+          console.log(res.data)
+          ElMessage.success('Registration successful!')
+          resetForm()
+          router.push('/login')
+          }else{
+            ElMessage.error(res.data.message || 'Registration failed!')
+          }
+        })
+        .catch(err => {
+          console.log(err)
+          ElMessage.error('Registration failed!')
+        })
     } else {
       console.log('submit failed!')
       return false
     }
   })
 }
+
+function resetForm(){
+  registerForm.email = ''
+  registerForm.password = ''
+  registerForm.confirmPassword = ''
+  registerForm.nickname = ''
+}
+
 </script>
 
 <style scoped>
