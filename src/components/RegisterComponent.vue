@@ -16,6 +16,9 @@
         <el-form-item label="Password" prop="password">
           <el-input type="password" v-model="registerForm.password" placeholder="Enter your password"></el-input>
         </el-form-item>
+        <el-form-item label="Confirm Password" prop="confirmPassword">
+          <el-input type="password" v-model="registerForm.confirmPassword" palceholder="Please confirm your password"></el-input>
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleRegister">Register</el-button>
         </el-form-item>
@@ -34,20 +37,37 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 const registerForm = reactive({
   email: '',
-  password: ''
+  password: '',
+  confirmPassword: ''
 })
 
-const rules = {
-  email: [{ required: true, message: 'Enter your e-mail', trigger: 'blur' }],
-  password: [{ required: true, message: 'Enter your password', trigger: 'blur' }]
-}
-
 const registerFormRef = ref(null)
+
+const rules = {
+  email: [
+    { required: true, message: 'Enter your e-mail', trigger: 'blur' },
+    { type: 'email', message: 'Enter a valid e-mail', trigger: 'blur' }
+  ],
+  password: [
+    { required: true, message: 'Enter your password', trigger: 'blur' },
+    { min: 6, message: 'Password must be at least 6 characters', trigger: 'blur' }
+  ],
+  confirmPassword: [
+    { required: true, message: 'Please confirm your password', trigger: 'blur' },
+    { validator: (rule, value) => {
+      if (value !== registerForm.password) {
+        return Promise.reject(new Error('Passwords do not match'))
+      } else {
+        return Promise.resolve()
+      }
+    }, trigger: 'blur' }
+  ]
+}
 
 function handleRegister() {
   registerFormRef.value.validate((valid) => {
     if (valid) {
-      console.log("Register:", registerForm.email, registerForm.password)
+      console.log("Register:", registerForm)
       router.push({ name: 'Login' })
     } else {
       console.log('submit failed!')

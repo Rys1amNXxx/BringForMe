@@ -139,7 +139,7 @@ function handleUploadSuccess(response, _file, _fileListRef) {
     newPostImageUrl.value = response.url
   } else {
     ElMessage.error('Upload failed')
-  }
+  } 
 }
 
 // eslint-disable-next-line no-unused-vars
