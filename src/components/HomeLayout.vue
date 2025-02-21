@@ -14,7 +14,7 @@
         :on-success="handleUploadSuccess" :headers="uploadHeaders">
         <el-button type="primary">Upload</el-button>
         <template #tip>
-          <div class="el-upload__tip" style="font-size:10px;">
+          <div class="el-upload__tip">
             jpg/png files with a size less than 500kb
           </div>
         </template>
@@ -86,15 +86,6 @@ const posts = ref([
 ])
 
 function handlePost() {
-  // if (newPostContent.value.trim()) {
-  //   posts.value.unshift({
-  //     id: Date.now(),
-  //     user: { name: 'TOM', avatar: 'https://via.placeholder.com/40' },
-  //     time: 'now',
-  //     content: newPostContent.value
-  //   })
-  //   newPostContent.value = ''
-  // }
   if (!newPostContent.value.trim()) {
     ElMessage.warning('Empty content')
     return
@@ -249,7 +240,7 @@ function resetForm() {
   gap: 10px;
 }
 .rewardLabel {
-  font-family: 'Times New Roman', Times, serif;
+  font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif
 }
 .reward-box {
   display: flex;
@@ -259,5 +250,9 @@ function resetForm() {
 .rewardInput {
   margin-left: 10px;
   width: 100px;
+}
+.el-upload__tip {
+  font-size: 10px;
+  color: #999;
 }
 </style>

@@ -11,18 +11,18 @@
       <el-menu default-active="home" router>
         <el-menu-item index="/" style="width: 200px; font-size: large;font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">
           <el-icon style="margin-right:30px">
-            <i class="el-icon-house"></i>
+            <House />
           </el-icon>
           <!-- <router-link to="/" style="color: inherit;">Home</router-link> -->
-          Home
+          <span>Home</span>
         </el-menu-item>
 
         <el-menu-item index="messages" style="width: 200px; font-size: large;font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">
           <el-icon style="margin-right:30px">
-            <i class="el-icon-message"></i>
+            <ChatDotRound />
           </el-icon>
           <!-- <router-link to="/messages" style="color: inherit;">Messages</router-link> -->
-          Messages
+          <span>Messages</span>
         </el-menu-item>
 
       </el-menu>
