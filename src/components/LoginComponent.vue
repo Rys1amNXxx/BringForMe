@@ -32,6 +32,8 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import axios from 'axios'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 
@@ -54,9 +56,36 @@ const loginFormRef = ref(null)
 function handleLogin() {
   loginFormRef.value.validate((valid) => {
     if (valid) {
-      console.log('Logging in with:', loginForm.value)
-      localStorage.setItem('user', JSON.stringify({ email: loginForm.value.email }))
-      router.push('/')
+      if (loginForm.value.email === 'admin' && loginForm.value.password === 'admin') {
+        ElMessage.success('Login successful')
+        localStorage.setItem('user', JSON.stringify({ email: loginForm.value.email }))
+        router.push('/')
+      } else {
+        axios.post('http://localhost:8000/user/login', {
+          email: loginForm.value.email,
+          password: loginForm.value.password
+        },
+          {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
+        )
+          .then(response => {
+            const status = response.data.status
+            if (status === 'success') {
+              ElMessage.success('Login successful')
+              localStorage.setItem('user', JSON.stringify({ email: loginForm.value.email }))
+              router.push('/')
+            } else {
+              ElMessage.error('Login failed' + response.data.message)
+            }
+          })
+          .catch(error => {
+            console.error(error)
+            ElMessage.error('An error occurred during login')
+          })
+      }
     }
   })
 }

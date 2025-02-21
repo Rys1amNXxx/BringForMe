@@ -17,7 +17,8 @@
           <el-input type="password" v-model="registerForm.password" placeholder="Enter your password"></el-input>
         </el-form-item>
         <el-form-item label="Confirm Password" prop="confirmPassword">
-          <el-input type="password" v-model="registerForm.confirmPassword" palceholder="Please confirm your password"></el-input>
+          <el-input type="password" v-model="registerForm.confirmPassword"
+            palceholder="Please confirm your password"></el-input>
         </el-form-item>
         <el-form-item label="Nickname" prop="nickname">
           <el-input v-model="registerForm.nickname" placeholder="Please enter your nickname"></el-input>
@@ -36,7 +37,7 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import {ElMessage} from 'element-plus'
+import { ElMessage } from 'element-plus'
 import axios from 'axios'
 
 const router = useRouter()
@@ -60,13 +61,15 @@ const rules = {
   ],
   confirmPassword: [
     { required: true, message: 'Please confirm your password', trigger: 'blur' },
-    { validator: (rule, value) => {
-      if (value !== registerForm.password) {
-        return Promise.reject(new Error('Passwords do not match'))
-      } else {
-        return Promise.resolve()
-      }
-    }, trigger: 'blur' }
+    {
+      validator: (rule, value) => {
+        if (value !== registerForm.password) {
+          return Promise.reject(new Error('Passwords do not match'))
+        } else {
+          return Promise.resolve()
+        }
+      }, trigger: 'blur'
+    }
   ],
   nickname: [
     { required: true, message: 'Please enter your nickname', trigger: 'blur' }
@@ -81,14 +84,19 @@ function handleRegister() {
         password: registerForm.password,
         nickname: registerForm.nickname
       }
-      axios.post ('http://localhost:3000/api/auth/register', registrationData)
+      axios.post('http://localhost:8000/user/register', registrationData
+        , {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
         .then(res => {
-          if(res.data.status === true){
-          console.log(res.data)
-          ElMessage.success('Registration successful!')
-          resetForm()
-          router.push('/login')
-          }else{
+          if (res.data.status === true) {
+            console.log(res.data)
+            ElMessage.success('Registration successful!')
+            resetForm()
+            router.push('/login')
+          } else {
             ElMessage.error(res.data.message || 'Registration failed!')
           }
         })
@@ -103,7 +111,7 @@ function handleRegister() {
   })
 }
 
-function resetForm(){
+function resetForm() {
   registerForm.email = ''
   registerForm.password = ''
   registerForm.confirmPassword = ''
@@ -146,5 +154,4 @@ function resetForm(){
   width: 50px;
   height: 50px;
 }
-
 </style>

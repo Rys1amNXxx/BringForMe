@@ -4,16 +4,14 @@
     <div class="post-box">
       <el-input type="textarea" resize="none" placeholder="What's happening?" v-model="newPostContent"
         :autosize="{ minRows: 1, maxRows: 4 }" style="width: 100%;" />
-        <el-upload 
-        class="picture-upload"
-        v-model:file-list="fileList"
-        action="http://localhost:3000/api/upload"
-        list-type="picture"
-        :on-preview="handlePictureCardPreview"
-        :on-remove="handleUploadRemove"
-        :on-success="handleUploadSuccess"
-        :headers="uploadHeaders"
-        >
+      <div class="reward-box">
+        <span class="rewardLabel">Task reward-box(￡):</span>
+        <el-input-number v-model="taskReward" :min="0" :step="1" placeholder="Enter reward"
+          class="rewardInput" />
+      </div>
+      <el-upload class="picture-upload" v-model:file-list="fileList" action="http://localhost:3000/api/upload"
+        list-type="picture" :on-preview="handlePictureCardPreview" :on-remove="handleUploadRemove"
+        :on-success="handleUploadSuccess" :headers="uploadHeaders">
         <el-button type="primary">Upload</el-button>
         <template #tip>
           <div class="el-upload__tip" style="font-size:10px;">
@@ -58,14 +56,15 @@
 
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import {ElMessage} from 'element-plus'
+import { ElMessage } from 'element-plus'
 import axios from 'axios'
 
 const router = useRouter()
 const newPostContent = ref('')
+const taskReward = ref(0)
 const newPostImageUrl = ref('')
 const fileList = ref([])
-const uploadHeaders = { 
+const uploadHeaders = {
   // Authorization:'Bearer your token,' 
 }
 const posts = ref([
@@ -74,13 +73,15 @@ const posts = ref([
     user: { name: 'Name', avatar: 'https://via.placeholder.com/40' },
     time: '1m',
     content: 'Help! Can someone bring this for me from Lidl?',
-    image: 'https://via.placeholder.com/300x200'
+    image: 'https://via.placeholder.com/300x200',
+    reward: 5
   },
   {
     id: 2,
     user: { name: 'Name', avatar: 'https://via.placeholder.com/40' },
     time: '29m',
-    content: 'Just another post to show how it looks without an image.'
+    content: 'Just another post to show how it looks without an image.',
+    reward: 10
   }
 ])
 
@@ -103,8 +104,13 @@ function handlePost() {
   const postData = {
     content: newPostContent.value,
     imageUrl: newPostImageUrl.value,
+    reward: taskReward.value
   }
-  axios.post('http://localhost:3000/api/tasks', postData)
+  axios.post('http://localhost:3000/api/tasks', postData, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
     .then((res) => {
       if (res.data.success) {
         ElMessage.success('Task posted successfully')
@@ -127,8 +133,8 @@ function contactNow(post) {
   }
 
   router.push({
-    name:"Messages",
-    query:{ newContact: JSON.stringify(newContact)}
+    name: "Messages",
+    query: { newContact: JSON.stringify(newContact) }
   })
 }
 
@@ -139,7 +145,7 @@ function handleUploadSuccess(response, _file, _fileListRef) {
     newPostImageUrl.value = response.url
   } else {
     ElMessage.error('Upload failed')
-  } 
+  }
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -156,8 +162,7 @@ function resetForm() {
 </script>
 
 <style scoped>
-
-.postButton{
+.postButton {
   width: 100px;
   height: 30px;
   font-size: large;
@@ -242,5 +247,17 @@ function resetForm() {
 .post-footer {
   display: flex;
   gap: 10px;
+}
+.rewardLabel {
+  font-family: 'Times New Roman', Times, serif;
+}
+.reward-box {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+.rewardInput {
+  margin-left: 10px;
+  width: 100px;
 }
 </style>
