@@ -41,6 +41,9 @@
         <div class="post-content">
           <p>{{ post.content }}</p>
           <img v-if="post.image" :src="post.image" alt="Post Image" class="post-image" />
+          <div class="post-reward">
+            <el-tag type="success">Reward: ￡{{ post.reward }}</el-tag>
+          </div>
         </div>
 
         <div class="post-footer">
@@ -58,6 +61,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
+import { onMounted } from 'vue'
 
 const router = useRouter()
 const newPostContent = ref('')
@@ -70,7 +74,7 @@ const uploadHeaders = {
 const posts = ref([
   {
     id: 1,
-    user: { name: 'Name', avatar: 'https://via.placeholder.com/40' },
+    user: { name: 'Name1', avatar: 'https://via.placeholder.com/40' },
     time: '1m',
     content: 'Help! Can someone bring this for me from Lidl?',
     image: 'https://via.placeholder.com/300x200',
@@ -78,12 +82,14 @@ const posts = ref([
   },
   {
     id: 2,
-    user: { name: 'Name', avatar: 'https://via.placeholder.com/40' },
+    user: { name: 'Name2', avatar: 'https://via.placeholder.com/40' },
     time: '29m',
     content: 'Just another post to show how it looks without an image.',
     reward: 10
   }
 ])
+
+
 
 function handlePost() {
   if (!newPostContent.value.trim()) {
@@ -150,6 +156,17 @@ function resetForm() {
   newPostImageUrl.value = ''
   fileList.value = []
 }
+
+onMounted(()=>{
+  axios.get('http://localhost:3000/api/tasks')
+  .then((res) => {
+    posts.value = res.data
+  })
+  .catch((err) => {
+    console.error(err)
+    ElMessage.error('Failed to fetch tasks')
+  })
+})
 </script>
 
 <style scoped>
@@ -254,5 +271,9 @@ function resetForm() {
 .el-upload__tip {
   font-size: 10px;
   color: #999;
+}
+.post-reward{
+  margin : 10px;
+  font-weight: bold;
 }
 </style>
