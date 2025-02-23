@@ -61,7 +61,7 @@ function handleLogin() {
         localStorage.setItem('user', JSON.stringify({ email: loginForm.value.email }))
         router.push('/')
       } else {
-        axios.post('http://localhost:8000/user/login', {
+        axios.post('http://localhost:8000/api/user/login', {
           email: loginForm.value.email,
           password: loginForm.value.password
         },
@@ -74,8 +74,10 @@ function handleLogin() {
           .then(response => {
             const status = response.data.status
             if (status === 'success') {
+              const token = response.data.data.token
+              localStorage.setItem('token', token)
               ElMessage.success('Login successful')
-              localStorage.setItem('user', JSON.stringify({ email: loginForm.value.email }))
+              // localStorage.setItem('user', JSON.stringify({ email: loginForm.value.email }))
               router.push('/')
             } else {
               ElMessage.error('Login failed' + response.data.message)
@@ -89,6 +91,8 @@ function handleLogin() {
     }
   })
 }
+
+
 </script>
 
 <style scoped>
