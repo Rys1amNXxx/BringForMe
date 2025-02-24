@@ -96,41 +96,5 @@ function handleLogin() {
 </script>
 
 <style scoped>
-.login-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background-color: white;
-}
-
-.logo-section {
-  display: flex;
-  align-items: center;
-  margin-bottom: 30px;
-}
-
-.runner-icon,
-.bag-icon {
-  width: 50px;
-  height: 50px;
-}
-
-.runner-icon {
-  margin-right: 10px;
-}
-
-.bag-icon {
-  margin-left: 10px;
-}
-
-.login-card {
-  width: 400px;
-  text-align: center;
-}
-
-.el-form-item {
-  margin-bottom: 20px;
-}
+@import '../assets/LoginComponent.css';
 </style>

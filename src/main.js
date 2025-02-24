@@ -28,5 +28,3 @@ axios.interceptors.request.use(
   },
   error => Promise.reject(error)
 )
-
-createApp(App).use(router).mount('#app')

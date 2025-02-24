@@ -9,7 +9,8 @@
       </div>
 
       <el-menu default-active="home" router>
-        <el-menu-item index="/" style="width: 200px; font-size: large;font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">
+        <el-menu-item index="/"
+          style="width: 200px; font-size: large;font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">
           <el-icon style="margin-right:30px">
             <House />
           </el-icon>
@@ -17,7 +18,8 @@
           <span>Home</span>
         </el-menu-item>
 
-        <el-menu-item index="messages" style="width: 200px; font-size: large;font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">
+        <el-menu-item index="messages"
+          style="width: 200px; font-size: large;font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">
           <el-icon style="margin-right:30px">
             <ChatDotRound />
           </el-icon>
@@ -54,36 +56,5 @@ function goToProfile() {
 </script>
 
 <style scoped>
-.aside-bar {
-  background-color: #f8f8f8;
-  border-right: 1px solid #ddd;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px 0;
-}
-
-.profile-section {
-  text-align: center;
-  margin: 20px 0;
-}
-
-.profile-section p {
-  margin-top: 8px;
-  font-weight: bold;
-}
-
-.logout-section {
-  margin-top: auto;
-  padding-bottom: 20px;
-  display: flex;
-  justify-content: center;
-  width: 20px;
-}
-
-.main-content {
-  flex: 1;
-  width: 100%;
-  display: flex;
-}
+@import '../assets/MainLayout.css';
 </style>
