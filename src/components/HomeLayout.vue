@@ -51,11 +51,11 @@
         <div class="post-content">
           <p>{{ post.content }}</p>
           <img v-if="post.image" :src="post.image" alt="Post Image" class="post-image" />
+          <div v-if="post.address">
+            <span class="displayAddress">Address: {{ post.address }}</span>
+          </div>
           <div class="post-reward">
             <el-tag type="success">Reward: ￡{{ post.reward }}</el-tag>
-          </div>
-          <div v-if="post.address">
-            <span>Address: {{ post.address }}</span>
           </div>
         </div>
 
@@ -92,14 +92,16 @@ const posts = ref([
     time: '1m',
     content: 'Help! Can someone bring this for me from Lidl?',
     image: 'https://via.placeholder.com/300x200',
-    reward: 5
+    reward: 5,
+    address: '1234 Elm Street, Springfield, IL'
   },
   {
     id: 2,
     user: { name: 'Name2', avatar: 'https://via.placeholder.com/40' },
     time: '29m',
     content: 'Just another post to show how it looks without an image.',
-    reward: 10
+    reward: 10,
+    address: '1234 Elm Street, Springfield, IL'
   }
 ])
 
@@ -299,5 +301,10 @@ onMounted(()=>{
 .post-reward{
   margin : 10px;
   font-weight: bold;
+}
+.displayAddress{
+  font-size: smaller;
+  color: #999;
+  margin-left: 10px;
 }
 </style>
