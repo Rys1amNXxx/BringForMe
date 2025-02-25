@@ -56,7 +56,7 @@ const loginFormRef = ref(null)
 function handleLogin() {
   loginFormRef.value.validate((valid) => {
     if (valid) {
-      if (loginForm.value.email === 'admin' && loginForm.value.password === 'admin') {
+      if (loginForm.value.username === 'admin' && loginForm.value.password === 'admin') {
         ElMessage.success('Login successful')
         localStorage.setItem('user', JSON.stringify({ email: loginForm.value.email }))
         router.push('/')
