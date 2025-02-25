@@ -7,6 +7,7 @@ import TaskFeed from '../components/TaskFeed.vue'
 import Profile from '../components/ProfileComponent.vue'
 import HomeLayout from '@/components/HomeLayout.vue'
 import MainLayout from '../components/MainLayout.vue'
+import Delivery from '../components/deliveryPage.vue'
 
 const routes = [
   {
@@ -50,6 +51,12 @@ const routes = [
         meta: { requiresAuth: true }
       }
     ]
+  },
+  {
+    path: '/delivery',
+    name: 'Delivery',
+    component: Delivery,
+    meta: { requiresAuth: true }
   }
   // {
   //   path: '/',

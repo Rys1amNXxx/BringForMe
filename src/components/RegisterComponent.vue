@@ -153,7 +153,7 @@ function resetForm() {
 
 <style scoped>
 .register-container {
-  background-color: white;
+  /* background-color: white; */
   display: flex;
   flex-direction: column;
   justify-content: center;

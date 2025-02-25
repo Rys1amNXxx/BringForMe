@@ -43,7 +43,8 @@
           <el-avatar :size="40" :src="post.user.avatar" style="margin-right: 10px;" />
           <div class="post-user">
             <strong>{{ post.user.name }}</strong>
-            <span class="post-time">{{ post.time }}</span>
+            <p class="post-time">{{ post.time }}</p>
+              
           </div>
         </div>
 
@@ -102,6 +103,15 @@ const posts = ref([
     content: 'Just another post to show how it looks without an image.',
     reward: 10,
     address: '1234 Elm Street, Springfield, IL'
+  },
+  {
+    id: 3,
+    user: { name: 'Name3', avatar: 'https://via.placeholder.com/40' },
+    time: '1h',
+    content: 'I need help with my groceries. Can someone help me?',
+    image: 'https://via.placeholder.com/300x200',
+    reward: 15,
+    address: '1234 Elm Street, Springfield, IL'
   }
 ])
 
@@ -122,11 +132,15 @@ function cofirmAddress() {
 }
 
 function handlePost(address) {
+
+  const publishTime = new Date().toISOString()
+
   const postData = {
     content: newPostContent.value,
     image: newPostImageUrl.value,
     reward: taskReward.value,
-    address: address
+    address: address,
+    publishTime: publishTime
   }
   axios
   .post('http://localhost:3000/api/tasks', postData,{
