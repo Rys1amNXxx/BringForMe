@@ -10,8 +10,8 @@
     <!-- Login -->
     <el-card class="login-card">
       <el-form :model="loginForm" :rules="rules" ref="loginFormRef">
-        <el-form-item label="E-mail" prop="email">
-          <el-input v-model="loginForm.email" placeholder="Enter your e-mail"></el-input>
+        <el-form-item label="Username" prop="username">
+          <el-input v-model="loginForm.username" placeholder="Enter your username"></el-input>
         </el-form-item>
         <el-form-item label="Password" prop="password">
           <el-input type="password" v-model="loginForm.password" placeholder="Password"></el-input>
@@ -43,8 +43,8 @@ const loginForm = ref({
 })
 
 const rules = {
-  email: [
-    { required: true, message: 'Please input your email', trigger: 'blur' }
+  username: [
+    { required: true, message: 'Please input your username', trigger: 'blur' }
   ],
   password: [
     { required: true, message: 'Please input your password', trigger: 'blur' }
@@ -61,8 +61,8 @@ function handleLogin() {
         localStorage.setItem('user', JSON.stringify({ email: loginForm.value.email }))
         router.push('/')
       } else {
-        axios.post('http://localhost:8000/api/user/login', {
-          email: loginForm.value.email,
+        axios.post('http://localhost:8000/api/v1/user/token/', {
+          username: loginForm.value.username,
           password: loginForm.value.password
         },
           {
