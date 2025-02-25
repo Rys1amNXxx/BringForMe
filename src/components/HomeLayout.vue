@@ -22,9 +22,19 @@
 
 
       <div class="post-actions">
-        <el-button type="primary" @click="handlePost" class="postButton">Post</el-button>
+        <el-button type="primary" @click="openAddressDialog" class="postButton">Post</el-button>
       </div>
     </div>
+
+    <el-dialog v-model="addressDialogVisible" title="Choose your address">
+      <div>
+        <el-input placeholder="Please input your address" v-model="selectedAddress"></el-input>>
+      </div>
+      <template #footer>
+        <el-button @click="addressDialogVisible = false">Cancel</el-button>
+        <el-button type="primary" @click="cofirmAddress">Confirm</el-button>
+      </template>
+    </el-dialog>
 
     <!-- Post List -->
     <div class="post-list">
@@ -44,6 +54,9 @@
           <div class="post-reward">
             <el-tag type="success">Reward: ￡{{ post.reward }}</el-tag>
           </div>
+          <div v-if="post.address">
+            <span>Address: {{ post.address }}</span>
+          </div>
         </div>
 
         <div class="post-footer">
@@ -62,6 +75,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
 import { onMounted } from 'vue'
+
 
 const router = useRouter()
 const newPostContent = ref('')
@@ -89,37 +103,47 @@ const posts = ref([
   }
 ])
 
+const addressDialogVisible = ref(false)
+const selectedAddress = ref('')
 
-
-function handlePost() {
-  if (!newPostContent.value.trim()) {
+function openAddressDialog() {
+  if(!newPostContent.value.trim()){
     ElMessage.warning('Empty content')
     return
   }
+  addressDialogVisible.value = true
+}
 
+function cofirmAddress() {
+  addressDialogVisible.value = false
+  handlePost(selectedAddress.value)
+}
 
+function handlePost(address) {
   const postData = {
     content: newPostContent.value,
-    imageUrl: newPostImageUrl.value,
-    reward: taskReward.value
+    image: newPostImageUrl.value,
+    reward: taskReward.value,
+    address: address
   }
-  axios.post('http://localhost:3000/api/tasks', postData, {
+  axios
+  .post('http://localhost:3000/api/tasks', postData,{
     headers: {
       'Content-Type': 'application/json'
     }
   })
-    .then((res) => {
-      if (res.data.success) {
-        ElMessage.success('Task posted successfully')
-        resetForm()
-      } else {
-        ElMessage.error(res.data.message || 'Failed to post task')
-      }
-    })
-    .catch((err) => {
-      console.error(err)
-      ElMessage.error('Failed to post task')
-    })
+  .then((res) => {
+    if(res.data.success){
+      ElMessage.success('Post successful')
+      resetForm()
+    }else{
+      ElMessage.error(res.data.message || 'Failed to post')
+    }
+  })
+  .catch((err)=>{
+    console.error(err)
+    ElMessage.error('Failed to post')
+  })
 }
 
 function contactNow(post) {
