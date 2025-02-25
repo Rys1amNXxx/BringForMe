@@ -115,7 +115,6 @@ function sendMessage() {
   })
 }
 
-
 function scrollToBottom() {
   const el = chatMessagesRef.value
   if (el) {

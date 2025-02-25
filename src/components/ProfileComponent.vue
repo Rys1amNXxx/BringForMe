@@ -1,5 +1,4 @@
 <template>
-
   <div class="profile-page">
     <h2 style="font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">My Profile</h2>
     <el-card class="profile-card" shadow="hover">

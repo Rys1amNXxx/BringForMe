@@ -92,7 +92,6 @@ function handleLogin() {
   })
 }
 
-
 </script>
 
 <style scoped>

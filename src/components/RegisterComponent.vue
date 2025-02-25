@@ -7,9 +7,11 @@
       <img src="@/assets/shopping-bag-icon.png" alt="Shopping Bag" class="bag-icon" />
     </div>
 
-
     <el-card class="register-card">
       <el-form :model="registerForm" :rules="rules" ref="registerFormRef">
+        <el-form-item label="Username" prop="username">
+          <el-input v-model="registerForm.username" placeholder="Enter your username"></el-input>
+        </el-form-item>
         <el-form-item label="E-mail" prop="email">
           <el-input v-model="registerForm.email" placeholder="Enter your e-mail"></el-input>
         </el-form-item>
@@ -22,6 +24,15 @@
         </el-form-item>
         <el-form-item label="Nickname" prop="nickname">
           <el-input v-model="registerForm.nickname" placeholder="Please enter your nickname"></el-input>
+        </el-form-item>
+        <el-form-item label="Phone Number" prop="phoneNumber">
+          <el-input v-model="registerForm.phoneNumber" placeholder="Please enter your phone number"></el-input>
+        </el-form-item>
+        <el-form-item label="First Name">
+          <el-input v-model="registerForm.firstname" placeholder="Enter your first name"></el-input>
+        </el-form-item>
+        <el-form-item label="Last Name">
+          <el-input v-model="registerForm.lastname" placeholder="Enter your last name"></el-input>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleRegister">Register</el-button>
@@ -42,21 +53,28 @@ import axios from 'axios'
 
 const router = useRouter()
 const registerForm = reactive({
+  username: '',
   email: '',
   password: '',
   confirmPassword: '',
-  nickname: ''
+  nickname: '',
+  phoneNumber: '',
+  firstname: '',
+  lastname: ''
 })
 
 const registerFormRef = ref(null)
 
 const rules = {
+  username: [
+    { required: true, message: 'Please enter your username', trigger: 'blur' }
+  ],
   email: [
-    { required: true, message: 'Enter your e-mail', trigger: 'blur' },
-    { type: 'email', message: 'Enter a valid e-mail', trigger: 'blur' }
+    { required: true, message: 'Please enter your e-mail', trigger: 'blur' },
+    { type: 'email', message: 'Please enter a valid e-mail', trigger: 'blur' }
   ],
   password: [
-    { required: true, message: 'Enter your password', trigger: 'blur' },
+    { required: true, message: 'Please enter your password', trigger: 'blur' },
     { min: 6, message: 'Password must be at least 6 characters', trigger: 'blur' }
   ],
   confirmPassword: [
@@ -73,18 +91,27 @@ const rules = {
   ],
   nickname: [
     { required: true, message: 'Please enter your nickname', trigger: 'blur' }
+  ],
+  phoneNumber: [
+    { required: true, message: 'Please enter your phone number', trigger: 'blur' }
   ]
+
 }
 
 function handleRegister() {
   registerFormRef.value.validate((valid) => {
     if (valid) {
       const registrationData = {
+        username: registerForm.username,
         email: registerForm.email,
         password: registerForm.password,
-        nickname: registerForm.nickname
+        confirm_password: registerForm.confirmPassword,
+        nickname: registerForm.nickname,
+        phone: registerForm.phoneNumber,
+        firs_tname: registerForm.firstname,
+        last_name: registerForm.lastname
       }
-      axios.post('http://localhost:8000/user/register', registrationData
+      axios.post('http://localhost:8000/api/v1/user/register/', registrationData
         , {
           headers: {
             'Content-Type': 'application/json'
@@ -112,10 +139,14 @@ function handleRegister() {
 }
 
 function resetForm() {
+  registerForm.username = ''
   registerForm.email = ''
   registerForm.password = ''
   registerForm.confirmPassword = ''
   registerForm.nickname = ''
+  registerForm.phoneNumber = ''
+  registerForm.firstname = ''
+  registerForm.lastname = ''
 }
 
 </script>
