@@ -206,6 +206,8 @@ function beforeAvatarUpload(file) {
 
 .user-info {
   margin-top: 20px;
+  padding: 20px;
+
 }
 
 .user-info p {

@@ -32,11 +32,11 @@
         <el-button type="danger" @click="handleLogout">Log out</el-button>
       </div>
     </el-aside>
-    <el-scrollbar class="scrollbar">
-      <el-main class="main-content">
-        <router-view />
-      </el-main>
-    </el-scrollbar>
+    <!-- <el-scrollbar class="scrollbar"> -->
+    <el-main class="main-content">
+      <router-view />
+    </el-main>
+    <!-- </el-scrollbar> -->
   </el-container>
 </template>
 
