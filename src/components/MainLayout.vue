@@ -21,9 +21,17 @@
         <el-menu-item index="messages"
           style="width: 200px; font-size: large;font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">
           <el-icon style="margin-right:30px">
-            <ChatDotRound />
+            <Message />
           </el-icon>
           <span>Messages</span>
+        </el-menu-item>
+
+        <el-menu-item index="Tasks"
+          style="width: 200px; font-size: large;font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">
+          <el-icon style="margin-right:30px">
+            <Collection />
+          </el-icon>
+          <span>Tasks</span>
         </el-menu-item>
 
       </el-menu>

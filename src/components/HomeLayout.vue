@@ -62,7 +62,7 @@
 
           <div class="post-footer">
             <el-button size="small" type="primary" @click="contactNow(post)">Contact Now</el-button>
-            <el-button size="small" type="success">Accept</el-button>
+            <el-button size="small" type="success" @click="handleAccpet(post)">Accept</el-button>
           </div>
         </div>
       </div>
@@ -72,7 +72,7 @@
 
 <script setup>
 
-import { ref } from 'vue'
+import { inject, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
@@ -87,6 +87,10 @@ const fileList = ref([])
 const uploadHeaders = {
   // Authorization:'Bearer your token,' 
 }
+
+const acceptedTasks = inject('acceptedTasks')
+const addAcceptedTask = inject('addAcceptedTask')
+
 const posts = ref([
   {
     id: 1,
@@ -196,6 +200,26 @@ function resetForm() {
   newPostContent.value = ''
   newPostImageUrl.value = ''
   fileList.value = []
+}
+
+function handleAccpet(post){
+  axios.get('/api/v1/order/',{
+    headers:{
+      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQwNTE5NDUzLCJpYXQiOjE3NDA1MTkxNTMsImp0aSI6ImNkYzcxYmM1YmJkZTQ5MzdiNmVmZWZjOTBjYzdjY2IxIiwidXNlcl9pZCI6MX0.PVjDt5CrtOGQbyj0xnSi11gWOwvdnJGBKMCJbVy6Ck4'
+    }
+  })
+  .then(res => {
+    if(res.data && res.data.success){
+      ElMessage.success('Task accepted')
+      acceptedTasks(post)
+    }else{
+      ElMessage.error('Failed to accept task')
+    }
+  })
+  .catch(err => {
+    console.error('Failed to accept task', err)
+    ElMessage.error('Failed to accept task')
+  })
 }
 
 onMounted(() => {

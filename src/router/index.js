@@ -7,7 +7,7 @@ import TaskFeed from '../components/TaskFeed.vue'
 import Profile from '../components/ProfileComponent.vue'
 import HomeLayout from '@/components/HomeLayout.vue'
 import MainLayout from '../components/MainLayout.vue'
-import Delivery from '../components/deliveryPage.vue'
+import Delivery from '../components/DeliveryPage.vue'
 
 const routes = [
   {

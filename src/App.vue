@@ -1,15 +1,24 @@
 <template>
-  <router-view/>
+  <TaskProvider>
+    <router-view />
+  </TaskProvider>
 </template>
 
 <script>
+import TaskProvider from './components/TaskProvider.vue';
+
 export default {
   name: 'App',
+  components: {
+    TaskProvider,
+  },
 }
 </script>
 
 <style>
-html,body,#app {
+html,
+body,
+#app {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -20,4 +29,3 @@ html,body,#app {
   background-image: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);
 }
 </style>
-
