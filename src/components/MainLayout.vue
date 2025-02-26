@@ -1,4 +1,5 @@
 <template>
+
   <el-container style="height:100vh">
 
     <el-aside width="240px" class="aside-bar">
@@ -14,7 +15,6 @@
           <el-icon style="margin-right:30px">
             <House />
           </el-icon>
-          <!-- <router-link to="/" style="color: inherit;">Home</router-link> -->
           <span>Home</span>
         </el-menu-item>
 
@@ -23,7 +23,6 @@
           <el-icon style="margin-right:30px">
             <ChatDotRound />
           </el-icon>
-          <!-- <router-link to="/messages" style="color: inherit;">Messages</router-link> -->
           <span>Messages</span>
         </el-menu-item>
 
@@ -33,10 +32,11 @@
         <el-button type="danger" @click="handleLogout">Log out</el-button>
       </div>
     </el-aside>
-
-    <el-main class="main-content">
-      <router-view />
-    </el-main>
+    <el-scrollbar class="scrollbar">
+      <el-main class="main-content">
+        <router-view />
+      </el-main>
+    </el-scrollbar>
   </el-container>
 </template>
 

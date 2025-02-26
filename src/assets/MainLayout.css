@@ -5,6 +5,7 @@
   flex-direction: column;
   align-items: center;
   padding: 10px 0;
+  flex-shrink: 0;
 }
 
 .profile-section {
@@ -32,6 +33,8 @@
   background-color: white;
 }
 
-/* .scrollbar {
-  margin-right: 0px;
-} */
+.scrollbar {
+  overflow-y: auto;
+  height: 100%;
+  width: 100%;
+}

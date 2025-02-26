@@ -18,6 +18,7 @@ html,body,#app {
   height: 100%;
   width: 100%;
   background-image: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);
+  overflow: hidden;
 }
 </style>
 
