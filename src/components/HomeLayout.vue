@@ -9,9 +9,9 @@
           <span class="rewardLabel">Task reward-box(￡):</span>
           <el-input-number v-model="taskReward" :min="0" :step="1" placeholder="Enter reward" class="rewardInput" />
         </div>
-        <el-upload class="picture-upload" v-model:file-list="fileList" action="http://localhost:3000/api/upload"
+        <el-upload class="picture-upload" v-model:file-list="fileList" action="http://localhost:3000/api/v1/media_manager/image/"
           list-type="picture" :on-preview="handlePictureCardPreview" :on-remove="handleUploadRemove"
-          :on-success="handleUploadSuccess">
+          :on-success="handleUploadSuccess" :headers="uploadHeaders">
           <el-button type="primary">Upload</el-button>
           <template #tip>
             <div class="el-upload__tip">
@@ -125,7 +125,7 @@
 
           <div class="post-footer">
             <el-button size="small" type="primary" @click="contactNow(post)">Contact Now</el-button>
-            <el-button size="small" type="success" @click="handleAccpet(post)">Accept</el-button>
+            <el-button size="small" type="success" @click="handleAccept(post)">Accept</el-button>
           </div>
         </div>
       </div>
@@ -139,7 +139,10 @@ import { inject, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { onMounted } from 'vue'
-// import defaultAvatar from '@/assets/avatar/defaultAvatar.jpeg'
+import defaultAvatar from '@/assets/avatar/defaultAvatar.jpeg'
+const uploadHeaders = {
+  Authorization: `Bearer ${localStorage.getItem('accessToken') || ''}`
+}
 
 import api from '@/api.js'
 
@@ -379,7 +382,7 @@ function contactNow(post) {
   const newContact = {
     id: Date.now(),
     name: post.user.name,
-    avatar: post.user.avatar || 'https://via.placeholder.com/40'
+    avatar: post.user.avatar || defaultAvatar,
   }
 
   router.push({
@@ -430,7 +433,7 @@ function resetNewAddressForm() {
   selectedAddress.value = ''
 }
 
-function handleAccpet(post) {
+function handleAccept(post) {
   api.get('order/')
     .then((res) => {
       if (res.data && res.data.success) {
