@@ -11,7 +11,7 @@
         </div>
         <el-upload class="picture-upload" v-model:file-list="fileList" action="http://localhost:3000/api/upload"
           list-type="picture" :on-preview="handlePictureCardPreview" :on-remove="handleUploadRemove"
-          :on-success="handleUploadSuccess" :headers="uploadHeaders">
+          :on-success="handleUploadSuccess">
           <el-button type="primary">Upload</el-button>
           <template #tip>
             <div class="el-upload__tip">
@@ -28,7 +28,7 @@
 
       <el-dialog v-model="addressDialogVisible" title="Choose your address">
         <div>
-          <el-input placeholder="Please input your address" v-model="selectedAddress"></el-input>>
+          <el-input placeholder="Please input your address" v-model="selectedAddress"></el-input>
         </div>
         <template #footer>
           <el-button @click="addressDialogVisible = false">Cancel</el-button>
@@ -75,18 +75,17 @@
 import { inject, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import axios from 'axios'
 import { onMounted } from 'vue'
 
+import api from '@/api.js'
 
 const router = useRouter()
 const newPostContent = ref('')
 const taskReward = ref(0)
 const newPostImageUrl = ref('')
 const fileList = ref([])
-const uploadHeaders = {
-  // Authorization:'Bearer your token,' 
-}
+
+
 
 const acceptedTasks = inject('acceptedTasks')
 const addAcceptedTask = inject('addAcceptedTask')
@@ -147,8 +146,7 @@ function handlePost(address) {
     address: address,
     publishTime: publishTime
   }
-  axios
-    .post('http://localhost:3000/api/tasks', postData, {
+    api.post('tasks', postData, {
       headers: {
         'Content-Type': 'application/json'
       }
@@ -203,12 +201,8 @@ function resetForm() {
 }
 
 function handleAccpet(post){
-  axios.get('/api/v1/order/',{
-    headers:{
-      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQwNTE5NDUzLCJpYXQiOjE3NDA1MTkxNTMsImp0aSI6ImNkYzcxYmM1YmJkZTQ5MzdiNmVmZWZjOTBjYzdjY2IxIiwidXNlcl9pZCI6MX0.PVjDt5CrtOGQbyj0xnSi11gWOwvdnJGBKMCJbVy6Ck4'
-    }
-  })
-  .then(res => {
+  api.get('order/') 
+  .then((res) => {
     if(res.data && res.data.success){
       ElMessage.success('Task accepted')
       acceptedTasks(post)
@@ -223,7 +217,7 @@ function handleAccpet(post){
 }
 
 onMounted(() => {
-  axios.get('http://localhost:3000/api/tasks')
+  api.get('tasks')
     .then((res) => {
       posts.value = res.data
     })

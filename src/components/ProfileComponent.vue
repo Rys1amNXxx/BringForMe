@@ -85,7 +85,7 @@ import { ref, onMounted, inject } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import defaultAvatar from '../assets/avatar/defaultAvatar.jpeg'
-import api from '../main.js'
+import api from '@/api.js'
 
 const router = useRouter()
 const default_avatar = defaultAvatar
