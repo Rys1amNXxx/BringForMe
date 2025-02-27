@@ -12,22 +12,8 @@
           :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
           <el-button type="primary">Change Avatar</el-button>
         </el-upload>
-        <!-- <el-button type="primary" @click="isSelectingAvatar = true">
-          Change Avatar
-        </el-button> -->
       </div>
 
-      <!-- <el-dialog v-model="isSelectingAvatar" title="Select an Avatar">
-        <div class="avatar-options">
-          <div v-for="(avatarUrl, index) in presetAvatars" :key="index" style="margin: 10px; cursor: pointer;"
-            @click="selectAvatar(avatarUrl)">
-            <el-avatar :src="avatarUrl" :size="80" />
-          </div>
-        </div>
-        <template #footer>
-          <el-button @click="isSelectingAvatar = false">Cancel</el-button>
-        </template>
-      </el-dialog> -->
 
       <p><strong>Nickname:</strong> {{ user.nickname }}</p>
       <p><strong>Email:</strong> {{ user.email }}</p>
@@ -73,14 +59,14 @@
     </el-dialog>
 
     <!-- Address 界面 -->
-    <div class="address-section">
+    <!-- <div class="address-section">
       <h3>Address</h3>
       <p><strong>Current Address:</strong> {{ user.address || 'No address provided' }}</p>
       <el-button @click="isEditingAddress = true">Edit Address</el-button>
-    </div>
+    </div> -->
 
     <!-- 编辑地址的弹窗 -->
-    <el-dialog v-model="isEditingAddress" title="Edit Address">
+    <!-- <el-dialog v-model="isEditingAddress" title="Edit Address">
       <el-form :model="addressForm">
         <el-form-item label="Address">
           <el-input v-model="addressForm.address" type="textarea" :rows="3" />
@@ -90,7 +76,7 @@
         <el-button @click="isEditingAddress = false">Cancel</el-button>
         <el-button type="primary" @click="saveAddress">Save</el-button>
       </template>
-    </el-dialog>
+    </el-dialog> -->
   </div>
 </template>
 
@@ -99,8 +85,7 @@ import { ref, onMounted, inject } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import defaultAvatar from '../assets/avatar/defaultAvatar.jpeg'
-// import avatar1 from '../assets/avatar/avatar_1.jpeg'
-// import avatar2 from '../assets/avatar/avatar_2.jpeg'
+import api from '../main.js'
 
 const router = useRouter()
 const default_avatar = defaultAvatar
@@ -114,10 +99,8 @@ if (!user) {
 // 编辑状态
 const isEditing = ref(false)
 const isEditingPassword = ref(false)
-const isEditingAddress = ref(false)
+// const isEditingAddress = ref(false)
 
-
-// const isSelectingAvatar = ref(false)
 
 // 编辑表单数据，字段统一为 nickname 和 email
 const editForm = ref({
@@ -156,13 +139,26 @@ const passwordRules = {
   ]
 }
 
-// const presetAvatars = ref([
-//   avatar1,
-//   avatar2
-// ])
+async function fetchUserProfile() {
+  try {
+    const response = await api.get('/user/{user_id}/profile/')
+    const data = response.data
+    user.value = { ...user.value, ...data }
+    editForm.value = {
+      nickname: user.value.nickname,
+      email: user.value.email
+    }
+    addressForm.value.address = user.value.address || ''
+    localStorage.setItem('user', JSON.stringify(user.value))
+  } catch (error) {
+    console.error('Failed to fetch user profile:', error)
+    ElMessage.error('Failed to fetch user profile.')
+  }
+}
 
 // 页面加载时从 localStorage 获取用户信息（如果存在）
 onMounted(() => {
+  fetchUserProfile()
   const storedUser = localStorage.getItem('user')
   if (storedUser) {
     // 合并已有的全局用户数据，避免覆盖其他字段
@@ -177,28 +173,55 @@ onMounted(() => {
 })
 
 // 保存编辑后的用户信息
-function saveProfile() {
-  // 合并修改后的数据，不覆盖未编辑字段
-  user.value = { ...user.value, ...editForm.value }
-  localStorage.setItem('user', JSON.stringify(user.value))
-  isEditing.value = false
-  ElMessage.success('Profile updated successfully!')
+async function saveProfile() {
+  try {
+    const updateData = {
+      nickname: editForm.value.nickname,
+      email: editForm.value.email
+    }
+    const response = await api.patch('/user/1/profile/', updateData)
+    user.value = { ...user.value, ...response.data }
+    localStorage.setItem('user', JSON.stringify(user.value))
+    isEditing.value = false
+    ElMessage.success('Profile updated successfully!')
+  } catch (error) {
+    console.error('Failed to update profile:', error)
+    ElMessage.error('Failed to update profile.')
+  }
 }
 
 // 保存修改后的密码
-function savePassword() {
-  // 添加实际修改密码逻辑，例如调用 API
-  ElMessage.success('Password updated successfully!')
-  isEditingPassword.value = false
+async function savePassword() {
+  try {
+    const passwordData = {
+      old_password: passwordForm.value.oldPassword,
+      new_password: passwordForm.value.newPassword,
+      confirm_new_password: passwordForm.value.confirmPassword
+    }
+    await api.patch('/user/{user_id}/password/', passwordData, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    ElMessage.success('Password updated successfully!')
+    isEditingPassword.value = false
+    // 清空密码表单
+    passwordForm.value.oldPassword = ''
+    passwordForm.value.newPassword = ''
+    passwordForm.value.confirmPassword = ''
+  } catch (error) {
+    console.error('Failed to update password:', error)
+    ElMessage.error('Failed to update password.')
+  }
 }
 
 // 保存修改后的地址
-function saveAddress() {
-  user.value.address = addressForm.value.address
-  localStorage.setItem('user', JSON.stringify(user.value))
-  isEditingAddress.value = false
-  ElMessage.success('Address updated successfully!')
-}
+// function saveAddress() {
+//   user.value.address = addressForm.value.address
+//   localStorage.setItem('user', JSON.stringify(user.value))
+//   isEditingAddress.value = false
+//   ElMessage.success('Address updated successfully!')
+// }
 
 // 退出登录
 function handleLogout() {
@@ -221,13 +244,6 @@ function beforeAvatarUpload(file) {
   }
   return isImage
 }
-
-// function selectAvatar(avatarUrl) {
-//   user.value.avatar = avatarUrl
-//   localStorage.setItem('user', JSON.stringify(user.value))
-//   ElMessage.success('Avatar updated successfully!')
-//   isSelectingAvatar.value = false
-// }
 
 </script>
 

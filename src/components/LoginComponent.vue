@@ -64,12 +64,10 @@ function refreshToken() {
       }
     })
     .then(response => {
-      // 假设返回数据结构为 { status: 'success', data: { access: 'xxx', refresh: 'yyy' }, message: '' }
       const status = response.data.status
       if (status === 'success') {
         const newAccessToken = response.data.data.access
         localStorage.setItem('accessToken', newAccessToken)
-        // 如果返回新的 refresh token，也更新之
         if (response.data.data.refresh) {
           localStorage.setItem('refreshToken', response.data.data.refresh)
         }
