@@ -9,7 +9,7 @@
           <span class="rewardLabel">Task reward-box(￡):</span>
           <el-input-number v-model="taskReward" :min="0" :step="1" placeholder="Enter reward" class="rewardInput" />
         </div>
-        <el-upload class="picture-upload" v-model:file-list="fileList" action="http://localhost:3000/api/v1/media_manager/image/"
+        <el-upload class="picture-upload" v-model:file-list="fileList" action="/api/v1/media_manager/image/"
           list-type="picture" :on-preview="handlePictureCardPreview" :on-remove="handleUploadRemove"
           :on-success="handleUploadSuccess" :headers="uploadHeaders">
           <el-button type="primary">Upload</el-button>
