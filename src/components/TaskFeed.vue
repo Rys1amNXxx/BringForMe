@@ -43,7 +43,7 @@
 <script setup>
 import { inject } from 'vue'
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import api from '@/api.js'
 
 const activeTab = ref('accepted')
 const acceptedTasks = inject('acceptedTasks')
@@ -52,7 +52,7 @@ const publishedTasks = ref([])
 
 onMounted(() => {
   // Fetch accepted tasks from the API
-  axios.get('http://localhost:3000/api/acceptedTasks')
+  api.get('acceptedTasks')
     .then((res) => {
       acceptedTasks.value = res.data
     })
@@ -61,7 +61,7 @@ onMounted(() => {
     })
 
   // Fetch published tasks from the API
-  axios.get('http://localhost:3000/api/publishedTasks')
+  api.get('publishedTasks')
     .then((res) => {
       publishedTasks.value = res.data
     })

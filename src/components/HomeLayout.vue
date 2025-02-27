@@ -151,7 +151,7 @@ const fileList = ref([])
 
 
 const acceptedTasks = inject('acceptedTasks', () => { })
-const addAcceptedTask = inject('addAcceptedTask', () => { })
+// const addAcceptedTask = inject('addAcceptedTask', () => { })
 
 const posts = ref([
   {
