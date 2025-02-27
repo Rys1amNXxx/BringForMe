@@ -49,7 +49,7 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import axios from 'axios'
+import api from '@/api.js'
 
 const router = useRouter()
 const registerForm = reactive({
@@ -111,7 +111,7 @@ function handleRegister() {
         firs_tname: registerForm.firstname,
         last_name: registerForm.lastname
       }
-      axios.post('http://localhost:8000/api/v1/user/register/', registrationData
+      api.post('user/register/', registrationData
         , {
           headers: {
             'Content-Type': 'application/json'
@@ -152,37 +152,5 @@ function resetForm() {
 </script>
 
 <style scoped>
-.register-container {
-  /* background-color: white; */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-
-.logo-section {
-  display: flex;
-  align-items: center;
-  margin-bottom: 30px;
-}
-
-.register-card {
-  width: 400px;
-  text-align: center;
-}
-
-.runner-icon {
-  margin-right: 10px;
-}
-
-.bag-icon {
-  margin-left: 10px;
-}
-
-.runner-icon,
-.bag-icon {
-  width: 50px;
-  height: 50px;
-}
+@import '../assets/RegisterComponent.css';
 </style>

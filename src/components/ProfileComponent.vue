@@ -88,6 +88,7 @@ import defaultAvatar from '../assets/avatar/defaultAvatar.jpeg'
 import api from '@/api.js'
 
 const router = useRouter()
+const user_id = user.value.id
 const default_avatar = defaultAvatar
 
 // 通过 inject 获取全局用户数据（确保父组件已提供）
@@ -141,7 +142,7 @@ const passwordRules = {
 
 async function fetchUserProfile() {
   try {
-    const response = await api.get('/user/{user_id}/profile/')
+    const response = await api.get(`/user/${user_id}/profile/`)
     const data = response.data
     user.value = { ...user.value, ...data }
     editForm.value = {
@@ -179,7 +180,7 @@ async function saveProfile() {
       nickname: editForm.value.nickname,
       email: editForm.value.email
     }
-    const response = await api.patch('/user/1/profile/', updateData)
+    const response = await api.patch(`/user/${user_id}/profile/`, updateData)
     user.value = { ...user.value, ...response.data }
     localStorage.setItem('user', JSON.stringify(user.value))
     isEditing.value = false
@@ -198,7 +199,7 @@ async function savePassword() {
       new_password: passwordForm.value.newPassword,
       confirm_new_password: passwordForm.value.confirmPassword
     }
-    await api.patch('/user/{user_id}/password/', passwordData, {
+    await api.patch(`/user/${user_id}/password/`, passwordData, {
       headers: {
         'Content-Type': 'application/json'
       }

@@ -32,8 +32,8 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
 import { ElMessage } from 'element-plus'
+import api from '../api.js'
 
 const router = useRouter()
 
@@ -56,7 +56,7 @@ const loginFormRef = ref(null)
 function refreshToken() {
   const storedRefreshToken = localStorage.getItem('refreshToken')
   if (storedRefreshToken) {
-    axios.post('http://localhost:8000/api/v1/user/token/refresh/', {
+    api.post('user/token/refresh/', {
       refresh: storedRefreshToken
     }, {
       headers: {
@@ -92,7 +92,7 @@ function handleLogin() {
         localStorage.setItem('user', JSON.stringify({ email: loginForm.value.email }))
         router.push('/')
       } else {
-        axios.post('http://localhost:8000/api/v1/user/token/', {
+        api.post('user/token/', {
           username: loginForm.value.username,
           password: loginForm.value.password
         },

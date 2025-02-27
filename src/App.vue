@@ -6,6 +6,7 @@
 import { ref, provide } from 'vue';
 
 const user = ref({
+  user_id: 1,
   nickname: 'Tom',
   email: '',
   avatar: '',
