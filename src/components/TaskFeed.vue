@@ -72,40 +72,5 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.task-container {
-  padding: 20px;
-}
-
-.task-list {
-  margin-top: 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.task-item {
-  padding: 15px;
-  border: 1px solid #ebeef5;
-  border-radius: 4px;
-  background-color: #ffffff;
-}
-
-.task-item h3 {
-  margin: 0 0 8px;
-}
-
-.task-item p {
-  margin: 4px 0;
-}
-
-.reward {
-  color: #67c23a;
-  font-weight: bold;
-}
-
-.empty-state {
-  padding: 20px;
-  text-align: center;
-  color: #909399;
-}
+@import '../assets/TaskFeed.css';
 </style>
