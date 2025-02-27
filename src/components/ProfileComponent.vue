@@ -1,20 +1,35 @@
 <template>
   <div class="profile-page">
-    <h2>Profile Page</h2>
+    <h2 style="font-weight: bold">Profile Page</h2>
     <p>Here is your personal info...</p>
 
     <!-- 用户信息展示 -->
     <div v-if="user" class="user-info">
       <!-- 头像上传 -->
       <div class="avatar-section">
-        <el-avatar :size="100" :src="user.avatar" class="avatar" />
+        <el-avatar :size="100" :src="user.avatar || default_avatar" class="avatar" />
         <el-upload action="https://your-upload-endpoint.com/upload" :show-file-list="false"
           :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
           <el-button type="primary">Change Avatar</el-button>
         </el-upload>
+        <!-- <el-button type="primary" @click="isSelectingAvatar = true">
+          Change Avatar
+        </el-button> -->
       </div>
 
-      <p><strong>Name:</strong> {{ user.name }}</p>
+      <!-- <el-dialog v-model="isSelectingAvatar" title="Select an Avatar">
+        <div class="avatar-options">
+          <div v-for="(avatarUrl, index) in presetAvatars" :key="index" style="margin: 10px; cursor: pointer;"
+            @click="selectAvatar(avatarUrl)">
+            <el-avatar :src="avatarUrl" :size="80" />
+          </div>
+        </div>
+        <template #footer>
+          <el-button @click="isSelectingAvatar = false">Cancel</el-button>
+        </template>
+      </el-dialog> -->
+
+      <p><strong>Nickname:</strong> {{ user.nickname }}</p>
       <p><strong>Email:</strong> {{ user.email }}</p>
       <el-button @click="isEditing = true">Edit Profile</el-button>
       <el-button @click="isEditingPassword = true">Change Password</el-button>
@@ -25,8 +40,8 @@
     <!-- 编辑用户信息的弹窗 -->
     <el-dialog v-model="isEditing" title="Edit Profile">
       <el-form :model="editForm">
-        <el-form-item label="Name">
-          <el-input v-model="editForm.name" />
+        <el-form-item label="Nickname">
+          <el-input v-model="editForm.nickname" />
         </el-form-item>
         <el-form-item label="Email">
           <el-input v-model="editForm.email" />
@@ -80,28 +95,33 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, inject } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import defaultAvatar from '../assets/avatar/defaultAvatar.jpeg'
+// import avatar1 from '../assets/avatar/avatar_1.jpeg'
+// import avatar2 from '../assets/avatar/avatar_2.jpeg'
 
 const router = useRouter()
+const default_avatar = defaultAvatar
 
-// 用户信息
-const user = ref({
-  name: 'John Doe',
-  email: 'john.doe@example.com',
-  avatar: 'https://via.placeholder.com/100',
-  address: '123 Main St, New York, USA'
-})
+// 通过 inject 获取全局用户数据（确保父组件已提供）
+const user = inject('user')
+if (!user) {
+  console.error('No user data found.')
+}
 
 // 编辑状态
 const isEditing = ref(false)
 const isEditingPassword = ref(false)
 const isEditingAddress = ref(false)
 
-// 编辑表单数据
+
+// const isSelectingAvatar = ref(false)
+
+// 编辑表单数据，字段统一为 nickname 和 email
 const editForm = ref({
-  name: '',
+  nickname: '',
   email: ''
 })
 
@@ -136,19 +156,30 @@ const passwordRules = {
   ]
 }
 
-// 页面加载时从 localStorage 获取用户信息
+// const presetAvatars = ref([
+//   avatar1,
+//   avatar2
+// ])
+
+// 页面加载时从 localStorage 获取用户信息（如果存在）
 onMounted(() => {
   const storedUser = localStorage.getItem('user')
   if (storedUser) {
-    user.value = JSON.parse(storedUser)
-    editForm.value = { ...user.value }
+    // 合并已有的全局用户数据，避免覆盖其他字段
+    user.value = { ...user.value, ...JSON.parse(storedUser) }
+    // 初始化编辑表单，确保字段名称一致
+    editForm.value = {
+      nickname: user.value.nickname,
+      email: user.value.email
+    }
     addressForm.value.address = user.value.address || ''
   }
 })
 
 // 保存编辑后的用户信息
 function saveProfile() {
-  user.value = { ...editForm.value }
+  // 合并修改后的数据，不覆盖未编辑字段
+  user.value = { ...user.value, ...editForm.value }
   localStorage.setItem('user', JSON.stringify(user.value))
   isEditing.value = false
   ElMessage.success('Profile updated successfully!')
@@ -156,7 +187,7 @@ function saveProfile() {
 
 // 保存修改后的密码
 function savePassword() {
-  // 这里可以添加密码修改的逻辑，例如调用 API
+  // 添加实际修改密码逻辑，例如调用 API
   ElMessage.success('Password updated successfully!')
   isEditingPassword.value = false
 }
@@ -175,9 +206,10 @@ function handleLogout() {
   router.push('/login')
 }
 
-// 头像上传成功
+//头像上传成功回调
 function handleAvatarSuccess(response) {
   user.value.avatar = response.url // 假设服务器返回头像 URL
+  localStorage.setItem('user', JSON.stringify(user.value))
   ElMessage.success('Avatar updated successfully!')
 }
 
@@ -189,57 +221,16 @@ function beforeAvatarUpload(file) {
   }
   return isImage
 }
+
+// function selectAvatar(avatarUrl) {
+//   user.value.avatar = avatarUrl
+//   localStorage.setItem('user', JSON.stringify(user.value))
+//   ElMessage.success('Avatar updated successfully!')
+//   isSelectingAvatar.value = false
+// }
+
 </script>
 
 <style scoped>
-.profile-page {
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  font-size: 16px;
-  /* 增大字体 */
-}
-
-.user-info {
-  margin-top: 20px;
-  padding: 20px;
-
-}
-
-.user-info p {
-  margin: 10px 0;
-  font-size: 18px;
-  /* 增大字体 */
-}
-
-.avatar-section {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 20px;
-}
-
-.avatar {
-  border: 2px solid #ddd;
-}
-
-.address-section {
-  margin-top: 30px;
-}
-
-.address-section h3 {
-  font-size: 20px;
-  /* 增大字体 */
-}
-
-.el-button {
-  margin-top: 20px;
-  margin-right: 10px;
-  font-size: 16px;
-  /* 增大字体 */
-}
+@import '../assets/ProfileComponent.css';
 </style>

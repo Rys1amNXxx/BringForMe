@@ -1,18 +1,25 @@
 <template>
-  <TaskProvider>
-    <router-view />
-  </TaskProvider>
+  <router-view />
 </template>
 
-<script>
-import TaskProvider from './components/TaskProvider.vue';
+<script setup>
+import { ref, provide } from 'vue';
 
-export default {
-  name: 'App',
-  components: {
-    TaskProvider,
-  },
-}
+const user = ref({
+  nickname: 'Tom',
+  email: '',
+  avatar: '',
+  address: '123 Main St, New York, USA'
+})
+
+provide('user', user);
+
+// export default {
+//   name: 'App',
+//   components: {
+//     TaskProvider,
+//   },
+// }
 </script>
 
 <style>
