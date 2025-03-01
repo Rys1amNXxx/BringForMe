@@ -34,6 +34,9 @@
         <el-form-item label="Last Name">
           <el-input v-model="registerForm.lastname" placeholder="Enter your last name"></el-input>
         </el-form-item>
+        <el-form-item label="Countrycode">
+          <el-input v-model="registerForm.countryCode"></el-input>
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleRegister">Register</el-button>
         </el-form-item>
@@ -60,7 +63,8 @@ const registerForm = reactive({
   nickname: '',
   phoneNumber: '',
   firstname: '',
-  lastname: ''
+  lastname: '',
+  contryCode:''
 })
 
 const registerFormRef = ref(null)
@@ -109,7 +113,8 @@ function handleRegister() {
         nickname: registerForm.nickname,
         phone: registerForm.phoneNumber,
         firs_tname: registerForm.firstname,
-        last_name: registerForm.lastname
+        last_name: registerForm.lastname,
+        country_code: registerForm.countryCode
       }
       api.post('user/register/', registrationData
         , {
@@ -118,7 +123,7 @@ function handleRegister() {
           }
         })
         .then(res => {
-          if (res.data.status === true) {
+          if (res.data.status === 'ok') {
             console.log(res.data)
             ElMessage.success('Registration successful!')
             resetForm()
@@ -147,6 +152,7 @@ function resetForm() {
   registerForm.phoneNumber = ''
   registerForm.firstname = ''
   registerForm.lastname = ''
+  registerForm.countryCode = ''
 }
 
 </script>

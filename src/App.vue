@@ -3,15 +3,29 @@
 </template>
 
 <script setup>
-import { ref, provide } from 'vue';
+import { ref, provide,onMounted } from 'vue';
 
 const user = ref({
-  user_id: 1,
-  nickname: 'Tom',
+  username: '',
+  user_id: 0,
+  nickname: '',
   email: '',
   avatar: '',
-  address: '123 Main St, New York, USA'
+  address: ''
 })
+
+onMounted(() => {
+  const storedUser = localStorage.getItem('user');
+  if (storedUser) {
+    try {
+      const parsedUser = JSON.parse(storedUser);
+      // 更新响应式对象
+      Object.assign(user.value, parsedUser);
+    } catch (e) {
+      console.error('解析用户数据失败：', e);
+    }
+  }
+});
 
 provide('user', user);
 

@@ -38,7 +38,7 @@ import api from '../api.js'
 const router = useRouter()
 
 const loginForm = ref({
-  email: '',
+  username: '',
   password: ''
 })
 
@@ -63,33 +63,33 @@ function refreshToken() {
         'Content-Type': 'application/json'
       }
     })
-    .then(response => {
-      const status = response.data.status
-      if (status === 'success') {
-        const newAccessToken = response.data.data.access
-        localStorage.setItem('accessToken', newAccessToken)
-        if (response.data.data.refresh) {
-          localStorage.setItem('refreshToken', response.data.data.refresh)
+      .then(response => {
+        const status = response.data.status
+        if (status === 'success') {
+          const newAccessToken = response.data.data.access
+          localStorage.setItem('accessToken', newAccessToken)
+          if (response.data.data.refresh) {
+            localStorage.setItem('refreshToken', response.data.data.refresh)
+          }
+          console.log('Token refreshed successfully')
+        } else {
+          console.error('Token refresh failed: ' + response.data.message)
         }
-        console.log('Token refreshed successfully')
-      } else {
-        console.error('Token refresh failed: ' + response.data.message)
-      }
-    })
-    .catch(error => {
-      console.error('Error during token refresh:', error)
-    })
+      })
+      .catch(error => {
+        console.error('Error during token refresh:', error)
+      })
   } else {
     console.error('No refresh token available.')
   }
 }
 
-function handleLogin() {
+async function handleLogin() {
   loginFormRef.value.validate((valid) => {
     if (valid) {
       if (loginForm.value.username === 'admin' && loginForm.value.password === 'admin') {
         ElMessage.success('Login successful')
-        localStorage.setItem('user', JSON.stringify({ email: loginForm.value.email }))
+        localStorage.setItem('user', JSON.stringify({ username: loginForm.value.username }))
         router.push('/')
       } else {
         api.post('user/token/', {
@@ -103,16 +103,22 @@ function handleLogin() {
           }
         )
           .then(response => {
-            const status = response.data.status
-            if (status === 'success') {
-              const accessToken = response.data.data.access
-              const refreshTokenValue = response.data.data.refresh
+            const status = response.data.access
+            if (status) {
+              const accessToken = response.data.access
+              const refreshTokenValue = response.data.refresh
               localStorage.setItem('accessToken', accessToken)
               localStorage.setItem('refreshToken', refreshTokenValue)
+              localStorage.setItem('user', JSON.stringify({ username: loginForm.value.username }))
               ElMessage.success('Login successful')
               // localStorage.setItem('user', JSON.stringify({ email: loginForm.value.email }))
-              router.push('/')
-              setInterval(refreshToken, 1000 * 60 * 5) 
+              console.log('准备跳转到主页...');
+              router.push('/').then(() => {
+                console.log('跳转到主页成功！');
+              }).catch((err) => {
+                console.error('跳转到主页失败:', err);
+              })
+              setInterval(refreshToken, 1000 * 60 * 5)
             } else {
               ElMessage.error('Login failed' + response.data.message)
             }
@@ -130,4 +136,4 @@ function handleLogin() {
 
 <style scoped>
 @import '../assets/LoginComponent.css';
-</style>  
+</style>

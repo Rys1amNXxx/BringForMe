@@ -6,7 +6,7 @@
 
       <div class="profile-section" @click="goToProfile" style="cursor: pointer;">
         <el-avatar :size="60" :src="user.avatar || default_avatar" />
-        <p class="aside-username">{{ user.nickname }}</p>
+        <p class="aside-username">{{ user.username }}</p>
       </div>
 
       <el-menu default-active="home" router>

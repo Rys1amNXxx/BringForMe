@@ -151,29 +151,30 @@ const newPostContent = ref('')
 const taskReward = ref(0)
 const newPostImageUrl = ref('')
 const fileList = ref([])
+const user_id = localStorage.getItem('user_id')
 
 
 const acceptedTasks = inject('acceptedTasks', () => { })
 // const addAcceptedTask = inject('addAcceptedTask', () => { })
 
 const posts = ref([
-  {
-    id: 1,
-    user: { name: 'Name1', avatar: 'https://via.placeholder.com/40' },
-    time: '1m',
-    content: 'Help! Can someone bring this for me from Lidl?',
-    image: 'https://via.placeholder.com/300x200',
-    reward: 5,
-    address: '1234 Elm Street, Springfield, IL'
-  },
-  {
-    id: 2,
-    user: { name: 'Name2', avatar: 'https://via.placeholder.com/40' },
-    time: '29m',
-    content: 'Just another post to show how it looks without an image.',
-    reward: 10,
-    address: '1234 Elm Street, Springfield, IL'
-  },
+  // {
+  //   id: 1,
+  //   user: { name: 'Name1', avatar: 'https://via.placeholder.com/40' },
+  //   time: '1m',
+  //   content: 'Help! Can someone bring this for me from Lidl?',
+  //   image: 'https://via.placeholder.com/300x200',
+  //   reward: 5,
+  //   address: '1234 Elm Street, Springfield, IL'
+  // },
+  // {
+  //   id: 2,
+  //   user: { name: 'Name2', avatar: 'https://via.placeholder.com/40' },
+  //   time: '29m',
+  //   content: 'Just another post to show how it looks without an image.',
+  //   reward: 10,
+  //   address: '1234 Elm Street, Springfield, IL'
+  // },
 ])
 
 const addressDialogVisible = ref(false)
@@ -208,7 +209,7 @@ function openAddressDialog() {
 }
 
 function getAddressList() {
-  api.get('user/address/')
+  api.get(`user/${user_id}/address/`)
     .then((res) => {
       if (res.data.success) {
         addressList.value = res.data.address || res.data
@@ -227,7 +228,7 @@ function selectAddress(addr) {
 }
 
 function addAddress() {
-  api.post('user/address/', newAddress.value, {
+  api.post(`user/${user_id}/address/`, newAddress.value, {
     headers: {
       'Content-Type': 'application/json'
     }
@@ -451,14 +452,14 @@ function handleAccept(post) {
 
 
 onMounted(() => {
-  // api.get('order/')
-  //   .then((res) => {
-  //     posts.value = res.data
-  //   })
-  //   .catch((err) => {
-  //     console.error(err)
-  //     ElMessage.error('Failed to fetch tasks')
-  //   })
+  api.get('order/')
+    .then((res) => {
+      posts.value = res.data
+    })
+    .catch((err) => {
+      console.error(err)
+      ElMessage.error('Failed to fetch tasks')
+    })
 })
 
 
