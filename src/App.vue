@@ -10,9 +10,9 @@ onMounted(() => {
   const storedUserProfile = localStorage.getItem('userProfile')
   if (storedUserProfile) {
     try {
-      const parsedProfile = JSON.parse(storedUserProfile)
+      userStore.profile = JSON.parse(storedUserProfile)
       // 将解析后的数据合并到全局状态 userStore 中
-      Object.assign(userStore.profile, parsedProfile)
+      console.log('Restored user profile:', userStore.profile)
     } catch (e) {
       console.error('解析用户数据失败：', e)
     }

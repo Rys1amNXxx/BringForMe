@@ -104,8 +104,10 @@ async function handleLogin() {
         // 获取用户资料
         // const userId = localStorage.getItem('userId')
         const profileRes = await api.get(`user/profile/`)
-        userStore.profile = profileRes.data.data || profileRes.data
-        localStorage.setItem('userProfile', JSON.stringify(profileRes.data))
+        const userInfo = profileRes.data.data
+        userStore.profile = userInfo
+        // userStore.profile = profileRes.data.data || profileRes.data
+        localStorage.setItem('userProfile', JSON.stringify(userInfo))
         
         // 跳转到主页
         router.push('/').then(() => {
