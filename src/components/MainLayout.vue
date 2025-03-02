@@ -5,8 +5,8 @@
     <el-aside width="240px" class="aside-bar">
 
       <div class="profile-section" @click="goToProfile" style="cursor: pointer;">
-        <el-avatar :size="60" :src="user.avatar || default_avatar" />
-        <p class="aside-username">{{ user.username }}</p>
+        <el-avatar :size="60" :src="userStore.profile.avatar || default_avatar" />
+        <p class="aside-username">{{ userStore.profile.nickname || userStore.profile.username }}</p>
       </div>
 
       <el-menu default-active="home" router>
@@ -53,8 +53,9 @@ import { useRouter } from 'vue-router'
 import{ inject } from 'vue'
 import default_avatar from '../assets/avatar/defaultAvatar.jpeg'
 
+
 const router = useRouter()
-const user = inject('user')
+const userStore = inject('user')
 
 function handleLogout() {
   localStorage.removeItem('user')

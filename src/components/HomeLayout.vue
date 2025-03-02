@@ -9,6 +9,7 @@
           <span class="rewardLabel">Task reward-box(￡):</span>
           <el-input-number v-model="taskReward" :min="0" :step="1" placeholder="Enter reward" class="rewardInput" />
         </div>
+        <!-- 图片上传：改为后端最新接口 /api/v1/media_manager/image/ -->
         <el-upload class="picture-upload" v-model:file-list="fileList" action="/api/v1/media_manager/image/"
           list-type="picture" :on-preview="handlePictureCardPreview" :on-remove="handleUploadRemove"
           :on-success="handleUploadSuccess" :headers="uploadHeaders">
@@ -19,7 +20,6 @@
             </div>
           </template>
         </el-upload>
-
 
         <div class="post-actions">
           <el-button type="primary" @click="openAddressDialog" class="postButton">Post</el-button>
@@ -33,16 +33,16 @@
           <el-tab-pane label="Select Address" name="select">
             <div v-if="addressList.length">
               <el-card v-for="addr in addressList" :key="addr.id" class="address-card"
-                @click="selectAddress(addr.address)" :class="{ selected: selectedAddress === addr.address }"
+                @click="selectAddress(addr)" :class="{ selected: selectedAddress && selectedAddress.id === addr.id }"
                 style="margin-bottom: 10px; cursor: pointer;">
-                <div @click="selectAddress(addr.address)">
+                <div>
                   <p><strong>Address:</strong> {{ addr.address }}</p>
                   <p>{{ addr.city }}, {{ addr.province }}, {{ addr.country }}</p>
                   <el-tag v-if="addr.is_default" type="success">Default</el-tag>
                 </div>
                 <div style="margin-top: 8px; text-align: right;">
-                  <el-button size="mini" @click.stop="startEditing(addr)">Edit</el-button>
-                  <el-button size="mini" type="danger" @click.stop="deleteAddress(addr.id)">Delete</el-button>
+                  <el-button size="small" @click.stop="startEditing(addr)">Edit</el-button>
+                  <el-button size="small" type="danger" @click.stop="deleteAddress(addr.id)">Delete</el-button>
                 </div>
               </el-card>
             </div>
@@ -50,6 +50,7 @@
               <p>No addresses found. Please add a new address.</p>
             </div>
           </el-tab-pane>
+
           <!-- 添加新地址 -->
           <el-tab-pane label="Add Address" name="add">
             <el-form :model="newAddress" label-width="120px" class="address-form">
@@ -85,7 +86,7 @@
               </el-form-item>
               <el-form-item>
                 <el-button type="primary" @click="isEditing ? updateAddress() : addAddress()">
-                  {{ isEditing ? 'Update Address' : 'Add Address' }}
+                  {{ isEditing ? "Update Address" : "Add Address" }}
                 </el-button>
               </el-form-item>
             </el-form>
@@ -99,33 +100,48 @@
         </template>
       </el-dialog>
 
-      <!-- Post List -->
+      <!-- Post List (适配新的 OrderModel 数据结构) -->
       <div class="post-list">
-        <div v-for="post in posts" :key="post.id" class="post-item">
+        <!-- 这里的 posts 是在 onMounted 时从后端获取的 order 列表 -->
+        <div v-for="order in orders" :key="order.id" class="post-item">
           <div class="post-header">
-            <el-avatar :size="40" :src="post.user.avatar" style="margin-right: 10px;" />
+            <!-- 使用默认头像 -->
+            <el-avatar :size="40" :src="defaultAvatar" style="margin-right: 10px;" />
             <div class="post-user">
-              <strong>{{ post.user.name }}</strong>
-              <p class="post-time">{{ post.time }}</p>
-
+              <!-- 以前 post.user.name 改为 order.user_id 或其它字段 -->
+              <strong>{{ order.user_id }}</strong>
+              <!-- 以前 post.time 改为 order.created_at 或 updated_at -->
+              <p class="post-time">Created: {{ order.created_at }}</p>
             </div>
           </div>
 
-          <!-- Content of the post -->
+          <!-- Content of the post (适配新的字段) -->
           <div class="post-content">
-            <p>{{ post.content }}</p>
-            <img v-if="post.image" :src="post.image" alt="Post Image" class="post-image" />
-            <div v-if="post.address">
-              <span class="displayAddress">Address: {{ post.address }}</span>
+            <!-- 原先 post.content 改为 order.description -->
+            <p>{{ order.description }}</p>
+
+            <!-- 如果后端返回 image_urls 数组，遍历展示所有图片 -->
+            <div v-if="order.image_urls && order.image_urls.length">
+              <div v-for="(imgUrl, idx) in order.image_urls" :key="idx" class="image-wrapper">
+                <img :src="imgUrl" alt="Order Image" class="post-image" />
+              </div>
             </div>
+
+            <!-- 如果有 destination 对象，显示地址信息 -->
+            <div v-if="order.destination">
+              <span class="displayAddress">Address: {{ order.destination.address }}</span>
+              <!-- 你也可以进一步展示 city, province, etc. -->
+            </div>
+
+            <!-- 原先 post.reward 改为 order.commission -->
             <div class="post-reward">
-              <el-tag type="success">Reward: ￡{{ post.reward }}</el-tag>
+              <el-tag type="success">Reward: ￡{{ order.commission }}</el-tag>
             </div>
           </div>
 
           <div class="post-footer">
-            <el-button size="small" type="primary" @click="contactNow(post)">Contact Now</el-button>
-            <el-button size="small" type="success" @click="handleAccept(post)">Accept</el-button>
+            <el-button size="small" type="primary" @click="contactNow(order)">Contact Now</el-button>
+            <el-button size="small" type="success" @click="handleAccept(order)">Accept</el-button>
           </div>
         </div>
       </div>
@@ -134,49 +150,50 @@
 </template>
 
 <script setup>
-
-import { inject, ref } from 'vue'
+import { inject, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { onMounted } from 'vue'
+import api from '@/api.js'
 import defaultAvatar from '@/assets/avatar/defaultAvatar.jpeg'
+
+// 上传头（如果你有全局拦截器，el-upload 默认不会走拦截器，需手动添加）
 const uploadHeaders = {
   Authorization: `Bearer ${localStorage.getItem('accessToken') || ''}`
 }
-
-import api from '@/api.js'
 
 const router = useRouter()
 const newPostContent = ref('')
 const taskReward = ref(0)
 const newPostImageUrl = ref('')
 const fileList = ref([])
-const user_id = localStorage.getItem('user_id')
+// const user_id = localStorage.getItem('user_id') || 1 // 或从后端获取
 
 
 const acceptedTasks = inject('acceptedTasks', () => { })
-// const addAcceptedTask = inject('addAcceptedTask', () => { })
 
-const posts = ref([
-  // {
-  //   id: 1,
-  //   user: { name: 'Name1', avatar: 'https://via.placeholder.com/40' },
-  //   time: '1m',
-  //   content: 'Help! Can someone bring this for me from Lidl?',
-  //   image: 'https://via.placeholder.com/300x200',
-  //   reward: 5,
-  //   address: '1234 Elm Street, Springfield, IL'
-  // },
-  // {
-  //   id: 2,
-  //   user: { name: 'Name2', avatar: 'https://via.placeholder.com/40' },
-  //   time: '29m',
-  //   content: 'Just another post to show how it looks without an image.',
-  //   reward: 10,
-  //   address: '1234 Elm Street, Springfield, IL'
-  // },
-])
 
+const orders = ref([])
+
+const newOrder = ref({
+  destination: {
+    tag: '',
+    country: '',
+    province: '',
+    city: '',
+    address: '',
+    remark: '',
+    postcode: '',
+    contact_person: '',
+    country_code: '',
+    phone: ''
+  },
+  description: '',
+  commission: 0,
+  acceptor: null,  // 或者 0
+  images: []
+})
+
+// 地址弹窗
 const addressDialogVisible = ref(false)
 const activeTab = ref('select')
 const addressList = ref([])
@@ -191,11 +208,13 @@ const newAddress = ref({
   address: '',
   remark: '',
   postcode: '',
+  country_code: '86',
   phone: '',
   is_default: false,
   contact_person: ''
 })
 
+// 打开地址弹窗
 function openAddressDialog() {
   if (!newPostContent.value.trim()) {
     ElMessage.warning('Empty content')
@@ -208,14 +227,26 @@ function openAddressDialog() {
   addressDialogVisible.value = true
 }
 
-function getAddressList() {
-  api.get(`user/${user_id}/address/`)
+function fetchOrders() {
+  api.get('order/')
     .then((res) => {
-      if (res.data.success) {
-        addressList.value = res.data.address || res.data
-      } else {
-        ElMessage.error('Failed to fetch address list')
-      }
+      // 假设后端返回一个数组
+      console.log('Order response:', res.data)
+      orders.value = res.data.data || []
+    })
+    .catch((err) => {
+      console.error(err)
+      ElMessage.error('Failed to fetch orders')
+    })
+}
+
+// 获取地址列表
+function getAddressList() {
+  // 假设 user_id 为 1 或实际获取
+  api.get(`user/address/`)
+    .then((res) => {
+      console.log('Address response:', res.data)
+      addressList.value = res.data.status === 'ok' ? res.data.data : []
     })
     .catch((err) => {
       console.error(err)
@@ -223,43 +254,33 @@ function getAddressList() {
     })
 }
 
+// 选择地址
 function selectAddress(addr) {
   selectedAddress.value = addr
 }
 
+// 新增地址
 function addAddress() {
-  api.post(`user/${user_id}/address/`, newAddress.value, {
-    headers: {
-      'Content-Type': 'application/json'
-    }
+  api.post(`user/address/`, newAddress.value, {
+    headers: { 'Content-Type': 'application/json' }
   })
     .then((res) => {
-      if (res.data.success) {
+      if (res.status >= 200 && res.status < 300) {
         ElMessage.success('Address added successfully')
         activeTab.value = 'select'
         getAddressList()
-        newAddress.value = {
-          tag: '',
-          country: '',
-          province: '',
-          city: '',
-          address: '',
-          remark: '',
-          postcode: '',
-          phone: '',
-          is_default: false,
-          contact_person: ''
-        }
+        resetNewAddressForm()
       } else {
         ElMessage.error(res.data.message || 'Failed to add address')
       }
     })
     .catch((err) => {
-      console.error(err)
+      console.error(err.response?.data)
       ElMessage.error('Failed to add address')
     })
 }
 
+// 编辑地址
 function startEditing(addr) {
   newAddress.value = { ...addr }
   isEditing.value = true
@@ -267,24 +288,65 @@ function startEditing(addr) {
   activeTab.value = 'add'
 }
 
+// 确认所选地址并发起任务发布
 function confirmSelectedAddress() {
   if (!selectedAddress.value) {
     ElMessage.warning('Please select an address')
     return
   }
   addressDialogVisible.value = false
-  handlePost(selectedAddress.value)
+  createOrderWithSelectedAddress()
 }
 
+function createOrderWithSelectedAddress() {
+  // 把选中的地址对象合并到 newOrder.destination
+  newOrder.value.destination = {
+    tag: selectedAddress.value.tag,
+    country: selectedAddress.value.country,
+    province: selectedAddress.value.province,
+    city: selectedAddress.value.city,
+    address: selectedAddress.value.address,
+    remark: selectedAddress.value.remark,
+    postcode: selectedAddress.value.postcode,
+    contact_person: selectedAddress.value.contact_person,
+    country_code: selectedAddress.value.country_code,
+    phone: selectedAddress.value.phone
+  }
+  // 赋值描述与奖励
+  newOrder.value.description = newPostContent.value
+  newOrder.value.commission = taskReward.value
+  // 如果上传成功返回的是图片 URL，则放到 images 数组中
+  newOrder.value.images = newPostImageUrl.value ? [newPostImageUrl.value] : []
+
+  // 发起请求创建订单
+  api.post('order/', newOrder.value, {
+    headers: { 'Content-Type': 'application/json' }
+  })
+    .then((res) => {
+      // 具体判断逻辑看后端返回
+      if (res.status >= 200 && res.status < 300) {
+        ElMessage.success('Post successful')
+        resetForm()
+        // 刷新订单列表
+        fetchOrders()
+      } else {
+        ElMessage.error('Failed to post')
+      }
+    })
+    .catch((err) => {
+      console.error(err)
+      ElMessage.error('Failed to post')
+    })
+}
+
+// 更新地址
 function updateAddress() {
   if (!editingAddressId.value) {
     ElMessage.error('No address ID found')
     return
   }
   api.patch(`user/address/${editingAddressId.value}/`, newAddress.value, {
-    headers: {
-      'Content-Type': 'application/json'
-    }
+    headers: { 'Content-Type': 'application/json' }
   })
     .then((res) => {
       if (res.data.success) {
@@ -304,6 +366,7 @@ function updateAddress() {
     })
 }
 
+// 删除地址
 function deleteAddress(addrId) {
   ElMessageBox.confirm(
     'Are you sure you want to delete this address?',
@@ -317,7 +380,7 @@ function deleteAddress(addrId) {
     .then(() => {
       api.delete(`user/address/${addrId}/`)
         .then((res) => {
-          if (res.data.success) {
+          if (res.status >= 200 && res.status < 300) {
             ElMessage.success('Address deleted successfully')
             getAddressList()
           } else {
@@ -330,68 +393,88 @@ function deleteAddress(addrId) {
         })
     })
     .catch(() => {
+      // 用户取消删除
     })
 }
 
-function handlePost(address) {
+// // 发布任务
+// function handlePost(address) {
+//   const publishTime = new Date().toISOString()
+//   const payload = {
+//     // 后端新接口字段
+//     destination: {
+//       id: 0,
+//       tag: '',
+//       country: '',
+//       province: '',
+//       city: '',
+//       address: address,
+//       remark: '',
+//       postcode: '',
+//       contact_person: '',
+//       country_code: '',
+//       phone: '',
+//       is_default: true,
+//       user_id: 0
+//     },
+//     description: newPostContent.value,
+//     commission: taskReward.value,
+//     status: 1,
+//     user_id: 0,
+//     // 如果上传后端返回的是图片 ID，就放到这里
+//     image_ids: newPostImageUrl.value ? [parseInt(newPostImageUrl.value) || 0] : [],
+//     publish_time: publishTime
+//   }
+//   api.post('order/', payload, {
+//     headers: { 'Content-Type': 'application/json' }
+//   })
+//     .then((res) => {
+//       if (res.data.success) {
+//         ElMessage.success('Post successful')
+//         resetForm()
+//       } else {
+//         ElMessage.error(res.data.message || 'Failed to post')
+//       }
+//     })
+//     .catch((err) => {
+//       console.error(err)
+//       ElMessage.error('Failed to post')
+//     })
+// }
 
-  const publishTime = new Date().toISOString()
-
-  const payload = {
-    destination: {
-      id: 0,
-      tag: '',
-      country: '',
-      province: '',
-      city: '',
-      address: address,
-      remark: '',
-      postcode: '',
-      contact_person: '',
-      country_code: '',
-      phone: '',
-      is_default: true,
-      user_id: 0
-    },
-    description: newPostContent.value,
-    commission: taskReward.value,
-    status: 1,
-    user_id: 0,
-    image_ids: newPostImageUrl.value ? [parseInt(newPostImageUrl.value) || 0] : [],
-    publish_time: publishTime
-  }
-  api.post('order/', payload, {
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
-    .then((res) => {
-      if (res.data.success) {
-        ElMessage.success('Post successful')
-        resetForm()
-      } else {
-        ElMessage.error(res.data.message || 'Failed to post')
-      }
-    })
-    .catch((err) => {
-      console.error(err)
-      ElMessage.error('Failed to post')
-    })
-}
-
-function contactNow(post) {
+// 联系任务发布者
+function contactNow(order) {
+  // 如果后端仅返回 user_id，需要再获取对应用户信息
+  // 这里只是演示：把 user_id 当做 name
   const newContact = {
     id: Date.now(),
-    name: post.user.name,
-    avatar: post.user.avatar || defaultAvatar,
+    name: `User ID: ${order.user_id}`,
+    avatar: defaultAvatar
   }
-
   router.push({
-    name: "Messages",
+    name: 'Messages',
     query: { newContact: JSON.stringify(newContact) }
   })
 }
 
+// 接受任务
+function handleAccept(order) {
+  api.get('order/')
+    .then((res) => {
+      if (res.data && res.data.success) {
+        ElMessage.success('Task accepted')
+        acceptedTasks(order)
+      } else {
+        ElMessage.error('Failed to accept task')
+      }
+    })
+    .catch((err) => {
+      console.error('Failed to accept task', err)
+      ElMessage.error('Failed to accept task')
+    })
+}
+
+// 图片上传成功
 // eslint-disable-next-line no-unused-vars
 function handleUploadSuccess(response, _file, _fileListRef) {
   console.log('Upload success:', response)
@@ -402,22 +485,26 @@ function handleUploadSuccess(response, _file, _fileListRef) {
   }
 }
 
+// 图片移除
 // eslint-disable-next-line no-unused-vars
 function handleUploadRemove(file, _fileListRef) {
   console.log('Remove file:', file)
   newPostImageUrl.value = ''
 }
 
+// 预览图片
 function handlePictureCardPreview(file) {
-  console.log("Preview file:", file)
+  console.log('Preview file:', file)
 }
 
+// 重置表单
 function resetForm() {
   newPostContent.value = ''
   newPostImageUrl.value = ''
   fileList.value = []
 }
 
+// 重置新地址表单
 function resetNewAddressForm() {
   newAddress.value = {
     tag: '',
@@ -431,40 +518,15 @@ function resetNewAddressForm() {
     is_default: false,
     contact_person: ''
   }
-  selectedAddress.value = ''
+  selectedAddress.value = null
 }
 
-function handleAccept(post) {
-  api.get('order/')
-    .then((res) => {
-      if (res.data && res.data.success) {
-        ElMessage.success('Task accepted')
-        acceptedTasks(post)
-      } else {
-        ElMessage.error('Failed to accept task')
-      }
-    })
-    .catch(err => {
-      console.error('Failed to accept task', err)
-      ElMessage.error('Failed to accept task')
-    })
-}
-
-
+// 组件挂载时获取最新订单列表
 onMounted(() => {
-  api.get('order/')
-    .then((res) => {
-      posts.value = res.data
-    })
-    .catch((err) => {
-      console.error(err)
-      ElMessage.error('Failed to fetch tasks')
-    })
+  fetchOrders()
 })
-
-
-
 </script>
+
 
 <style scoped>
 @import '../assets/HomeLayout.css';

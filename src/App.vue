@@ -3,40 +3,25 @@
 </template>
 
 <script setup>
-import { ref, provide,onMounted } from 'vue';
-
-const user = ref({
-  username: '',
-  user_id: 0,
-  nickname: '',
-  email: '',
-  avatar: '',
-  address: ''
-})
+import { onMounted, provide } from 'vue'
+import { userStore } from '@/store/user.js'
 
 onMounted(() => {
-  const storedUser = localStorage.getItem('user');
-  if (storedUser) {
+  const storedUserProfile = localStorage.getItem('userProfile')
+  if (storedUserProfile) {
     try {
-      const parsedUser = JSON.parse(storedUser);
-      // 更新响应式对象
-      Object.assign(user.value, parsedUser);
+      const parsedProfile = JSON.parse(storedUserProfile)
+      // 将解析后的数据合并到全局状态 userStore 中
+      Object.assign(userStore.profile, parsedProfile)
     } catch (e) {
-      console.error('解析用户数据失败：', e);
+      console.error('解析用户数据失败：', e)
     }
   }
-});
+})
 
-provide('user', user);
-
-// export default {
-//   name: 'App',
-//   components: {
-//     TaskProvider,
-//   },
-// }
+// 提供全局用户状态
+provide('user', userStore)
 </script>
-
 <style>
 html,
 body,

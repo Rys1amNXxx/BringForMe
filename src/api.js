@@ -6,9 +6,10 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const accessToken = localStorage.getItem('accessToken')
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`
+    const jwtToken = localStorage.getItem('accessToken')
+    console.log('JWT Token:', jwtToken)
+    if (jwtToken) {
+      config.headers.Authorization = `Bearer ${jwtToken}`
     }
     return config
   },
