@@ -18,7 +18,7 @@
           <span>Home</span>
         </el-menu-item>
 
-        <el-menu-item index="messages"
+        <el-menu-item index="/messages"
           style="width: 200px; font-size: large;font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">
           <el-icon style="margin-right:30px">
             <Message />

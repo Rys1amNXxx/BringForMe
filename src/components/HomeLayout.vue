@@ -447,8 +447,8 @@ function contactNow(order) {
   // 如果后端仅返回 user_id，需要再获取对应用户信息
   // 这里只是演示：把 user_id 当做 name
   const newContact = {
-    id: Date.now(),
-    name: `User ID: ${order.user_id}`,
+    id: order.user_id,
+    nickname: order.nickname || order.user_id,
     avatar: defaultAvatar
   }
   router.push({
