@@ -12,13 +12,15 @@
           <h3 class="currentContactName">{{ currentContact.nickname }}</h3>
           <span class="chat-header-time">{{ currentTime }}</span>
         </div>
-        <div class="chat-messages" ref="chatMessagesRef">
-          <div v-for="msg in currentMessages" :key="msg.id"
-            :class="['chat-bubble', msg.sender === 'me' ? 'me' : 'them']">
-            <div class="chat-text">{{ msg.content }}</div>
-            <div class="chat-time">{{ msg.created_at }}</div>
+        <el-scrollbar ref="scrollbarRef" class="chat-messages">
+          <div class="chat-messages" ref="chatMessagesRef">
+            <div v-for="msg in currentMessages" :key="msg.id"
+              :class="['chat-bubble', msg.sender === 'me' ? 'me' : 'them']">
+              <div class="chat-text">{{ msg.content }}</div>
+              <div class="chat-time">{{ msg.created_at }}</div>
+            </div>
           </div>
-        </div>
+        </el-scrollbar>
         <div class="chat-input">
           <el-input type="textarea" v-model="newMessage" resize="none" placeholder="Type your message..."
             @keyup.enter="sendMessage" />
@@ -57,7 +59,7 @@ import { inject } from 'vue'
 // }
 const userStore = inject('user')
 
-const currentUser = userStore.profile.user_id
+const currentUserNickname = userStore.profile.nickname
 
 const route = useRoute()
 
@@ -124,8 +126,14 @@ function sendMessage() {
       // 将后端返回的新消息插入到本地消息列表
       if (responseData.status === 'ok' && Array.isArray(responseData.data)) {
         responseData.data.forEach(msg => {
-          msg.sender = msg.sender === currentUser ? 'me' : 'them'
-          console.log('Server sender:', msg.sender, ' | currentUser:', currentUser)
+          // const originalSender = msg.sender
+          const isMe = (msg.sender === currentUserNickname)
+          msg.sender = isMe ? 'me' : 'them'
+          // console.log('Original sender:', originalSender,
+          //     '| currentUser:', currentUserNickname,
+          //     '=> mapped to:', msg.sender)
+          // msg.sender = msg.sender === currentUser ? 'me' : 'them'
+          // console.log('Server sender:', msg.sender, ' | currentUser:', currentUser)
           messagesMap.value[selectedContactId.value].push(msg)
         })
       } else {
@@ -154,14 +162,13 @@ function scrollToBottom() {
 function fetchMessages(receiverId) {
   api.get(`message/receiver/${receiverId}/`)
     .then(response => {
-      // 后端返回该联系人的消息数组
       const { data, status } = response.data
       if (status === 'ok' && Array.isArray(data)) {
-        data.forEach(msg =>{
-          msg.sender = msg.sender === currentUser ? 'me' : 'them'
+        data.forEach(msg => {
+          console.log('Original sender:', msg.sender)
+          msg.sender = (msg.sender === currentUserNickname) ? 'me' : 'them'
         })
         messagesMap.value[receiverId] = data
-        console.log('Messages:', messagesMap.value[receiverId])
       } else {
         messagesMap.value[receiverId] = []
       }
@@ -180,8 +187,6 @@ function fetchContacts() {
     .then(response => {
       const fetchedContacts = response.data.data || []
       contacts.value = fetchedContacts
-      // console.log('Contacts:', contacts.value)
-
       // 默认选中第一个联系人
       if (contacts.value.length > 0 && !selectedContactId.value) {
         selectedContactId.value = contacts.value[0].id
@@ -195,6 +200,7 @@ function fetchContacts() {
 
 // 组件挂载时
 onMounted(() => {
+  // console.log('Injected userStore:', userStore)
   fetchContacts().then(() => {
     if (route.query.newContact) {
       try {

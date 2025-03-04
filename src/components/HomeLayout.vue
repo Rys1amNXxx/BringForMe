@@ -10,7 +10,7 @@
           <el-input-number v-model="taskReward" :min="0" :step="1" placeholder="Enter reward" class="rewardInput" />
         </div>
         <!-- 图片上传：改为后端最新接口 /api/v1/media_manager/image/ -->
-        <el-upload class="picture-upload" v-model:file-list="fileList" action="/api/v1/media_manager/image/"
+        <el-upload class="picture-upload" v-model:file-list="fileList" action="/api/v1/media-manager/image/"
           list-type="picture" :on-preview="handlePictureCardPreview" :on-remove="handleUploadRemove"
           :on-success="handleUploadSuccess" :headers="uploadHeaders">
           <el-button type="primary">Upload</el-button>
@@ -431,7 +431,7 @@ function handleAccept(order) {
 // eslint-disable-next-line no-unused-vars
 function handleUploadSuccess(response, _file, _fileListRef) {
   console.log('Upload success:', response)
-  if (response.success && response.url) {
+  if (response.status === 'ok') {
     newPostImageUrl.value = response.url
   } else {
     ElMessage.error('Upload failed')
