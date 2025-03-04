@@ -397,55 +397,8 @@ function deleteAddress(addrId) {
     })
 }
 
-// // 发布任务
-// function handlePost(address) {
-//   const publishTime = new Date().toISOString()
-//   const payload = {
-//     // 后端新接口字段
-//     destination: {
-//       id: 0,
-//       tag: '',
-//       country: '',
-//       province: '',
-//       city: '',
-//       address: address,
-//       remark: '',
-//       postcode: '',
-//       contact_person: '',
-//       country_code: '',
-//       phone: '',
-//       is_default: true,
-//       user_id: 0
-//     },
-//     description: newPostContent.value,
-//     commission: taskReward.value,
-//     status: 1,
-//     user_id: 0,
-//     // 如果上传后端返回的是图片 ID，就放到这里
-//     image_ids: newPostImageUrl.value ? [parseInt(newPostImageUrl.value) || 0] : [],
-//     publish_time: publishTime
-//   }
-//   api.post('order/', payload, {
-//     headers: { 'Content-Type': 'application/json' }
-//   })
-//     .then((res) => {
-//       if (res.data.success) {
-//         ElMessage.success('Post successful')
-//         resetForm()
-//       } else {
-//         ElMessage.error(res.data.message || 'Failed to post')
-//       }
-//     })
-//     .catch((err) => {
-//       console.error(err)
-//       ElMessage.error('Failed to post')
-//     })
-// }
-
 // 联系任务发布者
 function contactNow(order) {
-  // 如果后端仅返回 user_id，需要再获取对应用户信息
-  // 这里只是演示：把 user_id 当做 name
   const newContact = {
     id: order.user_id,
     nickname: order.nickname || order.user_id,

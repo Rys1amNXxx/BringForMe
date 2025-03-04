@@ -13,23 +13,15 @@
           <span class="chat-header-time">{{ currentTime }}</span>
         </div>
         <div class="chat-messages" ref="chatMessagesRef">
-          <div
-            v-for="msg in currentMessages"
-            :key="msg.id"
-            :class="['chat-bubble', msg.sender === 'me' ? 'me' : 'them']"
-          >
+          <div v-for="msg in currentMessages" :key="msg.id"
+            :class="['chat-bubble', msg.sender === 'me' ? 'me' : 'them']">
             <div class="chat-text">{{ msg.content }}</div>
             <div class="chat-time">{{ msg.created_at }}</div>
           </div>
         </div>
         <div class="chat-input">
-          <el-input
-            type="textarea"
-            v-model="newMessage"
-            resize="none"
-            placeholder="Type your message..."
-            @keyup.enter="sendMessage"
-          />
+          <el-input type="textarea" v-model="newMessage" resize="none" placeholder="Type your message..."
+            @keyup.enter="sendMessage" />
           <el-button type="primary" @click="sendMessage">Send</el-button>
         </div>
       </div>
@@ -41,12 +33,8 @@
         <h3 style="font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">Contacts</h3>
       </div>
       <div class="contact-list">
-        <div
-          v-for="contact in contacts"
-          :key="contact.id"
-          :class="['contact-item', contact.id === selectedContactId ? 'active' : '']"
-          @click="selectContact(contact)"
-        >
+        <div v-for="contact in contacts" :key="contact.id"
+          :class="['contact-item', contact.id === selectedContactId ? 'active' : '']" @click="selectContact(contact)">
           <!-- 若后端无 avatar 字段，可给个默认图片 -->
           <el-avatar :size="40" :src="contact.avatar || defaultAvatar" />
           <span>{{ contact.nickname }}</span>
@@ -61,11 +49,15 @@ import { ref, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import api from '@/api'
 import defaultAvatar from '@/assets/avatar/defaultAvatar.jpeg'
+import { inject } from 'vue'
 
 /** 生成本地消息ID，仅做示例 */
-function generateId() {
-  return Date.now().toString() + Math.random().toString(36).substr(2, 9)
-}
+// function generateId() {
+//   return Date.now().toString() + Math.random().toString(36).substr(2, 9)
+// }
+const userStore = inject('user')
+
+const currentUser = userStore.profile.user_id
 
 const route = useRoute()
 
@@ -118,20 +110,36 @@ function selectContact(contact) {
 // 发送消息
 function sendMessage() {
   if (!newMessage.value.trim() || !selectedContactId.value) return
-  const msgObj = {
-    id: generateId(),
-    sender: 'me',
-    text: newMessage.value.trim(),
-    time: currentTime.value
-  }
-  if (!messagesMap.value[selectedContactId.value]) {
-    messagesMap.value[selectedContactId.value] = []
-  }
-  messagesMap.value[selectedContactId.value].push(msgObj)
-  newMessage.value = ''
-  nextTick(() => {
-    scrollToBottom()
+
+  api.post(`message/receiver/${selectedContactId.value}/`, {
+    content: newMessage.value.trim()
   })
+    .then(res => {
+      // 后端返回新创建的消息对象
+      const responseData = res.data
+      // 如果本地没有该联系人的消息数组，先初始化
+      if (!Array.isArray(messagesMap.value[selectedContactId.value])) {
+        messagesMap.value[selectedContactId.value] = []
+      }
+      // 将后端返回的新消息插入到本地消息列表
+      if (responseData.status === 'ok' && Array.isArray(responseData.data)) {
+        responseData.data.forEach(msg => {
+          msg.sender = msg.sender === currentUser ? 'me' : 'them'
+          console.log('Server sender:', msg.sender, ' | currentUser:', currentUser)
+          messagesMap.value[selectedContactId.value].push(msg)
+        })
+      } else {
+        console.warn('Unexpected response structure:', responseData)
+      }
+      // 清空输入框并滚动到底部
+      newMessage.value = ''
+      nextTick(() => {
+        scrollToBottom()
+      })
+    })
+    .catch(error => {
+      console.error('Error sending message:', error)
+    })
 }
 
 // 滚动到底部
@@ -147,7 +155,16 @@ function fetchMessages(receiverId) {
   api.get(`message/receiver/${receiverId}/`)
     .then(response => {
       // 后端返回该联系人的消息数组
-      messagesMap.value[receiverId] = response.data
+      const { data, status } = response.data
+      if (status === 'ok' && Array.isArray(data)) {
+        data.forEach(msg =>{
+          msg.sender = msg.sender === currentUser ? 'me' : 'them'
+        })
+        messagesMap.value[receiverId] = data
+        console.log('Messages:', messagesMap.value[receiverId])
+      } else {
+        messagesMap.value[receiverId] = []
+      }
       nextTick(() => {
         scrollToBottom()
       })
@@ -159,14 +176,12 @@ function fetchMessages(receiverId) {
 
 // 从后端获取联系人列表
 function fetchContacts() {
-  api.get('message/receiver/')
+  return api.get('message/receiver/')
     .then(response => {
-      // console.log('Contacts response:', response.data)
-      // 假设后端返回的是数组： [{id:1, nickname:'...'}, ...]
-      contacts.value = response.data.data || []
-      console.log('Contacts:', contacts.value)  
-      // 若后端无 avatar，可用默认头像
-      // contacts.value = response.data.map(c => ({ ...c, avatar: '', }))
+      const fetchedContacts = response.data.data || []
+      contacts.value = fetchedContacts
+      // console.log('Contacts:', contacts.value)
+
       // 默认选中第一个联系人
       if (contacts.value.length > 0 && !selectedContactId.value) {
         selectedContactId.value = contacts.value[0].id
@@ -180,26 +195,28 @@ function fetchContacts() {
 
 // 组件挂载时
 onMounted(() => {
-  fetchContacts()
-
-  // 如果路由带了 newContact 参数
-  if (route.query.newContact) {
-    try {
-      const newContact = JSON.parse(route.query.newContact)
-      // 检查是否包含必要字段 id、nickname
-      if (newContact.id && newContact.nickname) {
-        // 如果当前列表里没有这个联系人，则添加
-        if (!contacts.value.find(c => c.id === newContact.id)) {
-          contacts.value.push(newContact)
-          messagesMap.value[newContact.id] = []
+  fetchContacts().then(() => {
+    if (route.query.newContact) {
+      try {
+        const newContact = JSON.parse(route.query.newContact)
+        // 检查必要字段，这里建议使用 && 而非 ||
+        newContact.id = Number(newContact.id)
+        if (newContact.id || newContact.nickname) {
+          // 如果列表中没有该联系人，则添加
+          if (!contacts.value.find(c => c.id === newContact.id)) {
+            contacts.value.push(newContact)
+          }
+          // 将新联系人设为选中状态并获取消息
+          selectedContactId.value = newContact.id
+          fetchMessages(newContact.id)
+        } else {
+          console.warn('Error new contact', newContact)
         }
-      } else {
-        console.warn('newContact missing id or nickname:', newContact)
+      } catch (e) {
+        console.error('路由参数 newContact 格式错误:', e)
       }
-    } catch (e) {
-      console.error('Invalid newContact query parameter.', e)
     }
-  }
+  })
 })
 // 组件卸载时清除 timer
 onBeforeUnmount(() => {
