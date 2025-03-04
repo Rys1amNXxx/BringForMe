@@ -53,10 +53,6 @@ import api from '@/api'
 import defaultAvatar from '@/assets/avatar/defaultAvatar.jpeg'
 import { inject } from 'vue'
 
-/** 生成本地消息ID，仅做示例 */
-// function generateId() {
-//   return Date.now().toString() + Math.random().toString(36).substr(2, 9)
-// }
 const userStore = inject('user')
 
 const currentUserNickname = userStore.profile.nickname

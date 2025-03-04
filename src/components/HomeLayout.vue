@@ -32,8 +32,8 @@
           <!-- 已有地址列表 -->
           <el-tab-pane label="Select Address" name="select">
             <div v-if="addressList.length">
-              <el-card v-for="addr in addressList" :key="addr.id" class="address-card"
-                @click="selectAddress(addr)" :class="{ selected: selectedAddress && selectedAddress.id === addr.id }"
+              <el-card v-for="addr in addressList" :key="addr.id" class="address-card" @click="selectAddress(addr)"
+                :class="{ selected: selectedAddress && selectedAddress.id === addr.id }"
                 style="margin-bottom: 10px; cursor: pointer;">
                 <div>
                   <p><strong>Address:</strong> {{ addr.address }}</p>
@@ -109,7 +109,7 @@
             <el-avatar :size="40" :src="defaultAvatar" style="margin-right: 10px;" />
             <div class="post-user">
               <!-- 以前 post.user.name 改为 order.user_id 或其它字段 -->
-              <strong>{{ order.user_id }}</strong>
+              <strong>{{ order.nickname }}</strong>
               <!-- 以前 post.time 改为 order.created_at 或 updated_at -->
               <p class="post-time">Created: {{ order.created_at }}</p>
             </div>
@@ -140,8 +140,10 @@
           </div>
 
           <div class="post-footer">
-            <el-button size="small" type="primary" @click="contactNow(order)">Contact Now</el-button>
-            <el-button size="small" type="success" @click="handleAccept(order)">Accept</el-button>
+            <template v-if="order.user_id !== currentUserId">
+              <el-button size="small" type="primary" @click="contactNow(order)">Contact Now</el-button>
+              <el-button size="small" type="success" @click="handleAccept(order)">Accept</el-button>
+            </template>
           </div>
         </div>
       </div>
@@ -155,6 +157,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/api.js'
 import defaultAvatar from '@/assets/avatar/defaultAvatar.jpeg'
+const currentUserId = parseInt(localStorage.getItem('userId') || '0', 10)
 
 // 上传头（如果你有全局拦截器，el-upload 默认不会走拦截器，需手动添加）
 const uploadHeaders = {
@@ -169,10 +172,11 @@ const fileList = ref([])
 // const user_id = localStorage.getItem('user_id') || 1 // 或从后端获取
 
 
-const acceptedTasks = inject('acceptedTasks', () => { })
-
 
 const orders = ref([])
+const publishedTasks = ref([])
+const acceptedTasks = ref([])
+
 
 const newOrder = ref({
   destination: {
@@ -227,17 +231,38 @@ function openAddressDialog() {
   addressDialogVisible.value = true
 }
 
-function fetchOrders() {
-  api.get('order/')
-    .then((res) => {
-      // 假设后端返回一个数组
-      console.log('Order response:', res.data)
-      orders.value = res.data.data || []
+async function fetchOrders() {
+  try {
+    const res = await api.get('order/')
+    const allOrders = res.data.data || []
+    orders.value = allOrders
+
+    // 使用缓存避免重复请求
+    const userCache = {}
+
+    // 遍历订单，对每个订单获取发布者信息（如果没获取过）
+    const promises = orders.value.map(async (order) => {
+      const uid = order.user_id
+      if (!userCache[uid]) {
+        // 请求该发布者信息
+        const userRes = await api.get(`user/profile/${uid}/`)
+        // 假设后端返回结构为 { status: 'ok', data: { nickname: ..., avatar: ... } }
+        userCache[uid] = userRes.data.data
+      }
+      // 合并用户资料到订单中
+      order.nickname = userCache[uid].nickname
+      order.avatar = userCache[uid].avatar
     })
-    .catch((err) => {
-      console.error(err)
-      ElMessage.error('Failed to fetch orders')
-    })
+
+    // 等待所有用户信息请求完成
+    await Promise.all(promises)
+    publishedTasks.value = orders.value.filter(order => order.user_id === currentUserId)
+    acceptedTasks.value = orders.value.filter(order => order.acceptor === currentUserId && order.status === 1)
+    console.log('Orders with publisher info:', orders.value)
+  } catch (err) {
+    console.error('Failed to fetch orders:', err)
+    ElMessage.error('Failed to fetch orders')
+  }
 }
 
 // 获取地址列表
@@ -401,7 +426,7 @@ function deleteAddress(addrId) {
 function contactNow(order) {
   const newContact = {
     id: order.user_id,
-    nickname: order.nickname || order.user_id,
+    nickname: order.nickname,
     avatar: defaultAvatar
   }
   router.push({
@@ -411,20 +436,52 @@ function contactNow(order) {
 }
 
 // 接受任务
-function handleAccept(order) {
-  api.get('order/')
-    .then((res) => {
-      if (res.data && res.data.success) {
-        ElMessage.success('Task accepted')
-        acceptedTasks(order)
-      } else {
-        ElMessage.error('Failed to accept task')
+async function handleAccept(order) {
+  try {
+    const currentUserId = parseInt(localStorage.getItem('userId') || '0', 10)
+    const payload = {
+      status: 1,  // 1 表示 Order Accepted
+      acceptor: currentUserId
+    }
+    const res = await api.patch(`order/${order.id}/`, payload, {
+      headers: { 'Content-Type': 'application/json' }
+    })
+    if (res.data.status === 'ok') {
+      ElMessage.success('Task accepted successfully')
+      refreshTasks()
+    } else {
+      ElMessage.error(res.data.message || 'Failed to accept task')
+    }
+  } catch (err) {
+    console.error('Failed to accept task:', err)
+    ElMessage.error('Failed to accept task')
+  }
+}
+
+async function refreshTasks() {
+  try {
+    const res = await api.get('order/')
+    const allOrders = res.data.data || []
+    orders.value = allOrders
+
+    // 利用缓存获取发布者信息（与 fetchOrders 中相同逻辑）
+    const userCache = {}
+    const promises = orders.value.map(async (order) => {
+      const uid = order.user_id
+      if (!userCache[uid]) {
+        const userRes = await api.get(`user/profile/${uid}/`)
+        userCache[uid] = userRes.data.data
       }
+      order.nickname = userCache[uid].nickname
+      order.avatar = userCache[uid].avatar
     })
-    .catch((err) => {
-      console.error('Failed to accept task', err)
-      ElMessage.error('Failed to accept task')
-    })
+    await Promise.all(promises)
+
+    publishedTasks.value = orders.value.filter(order => order.user_id === currentUserId)
+    acceptedTasks.value = orders.value.filter(order => order.acceptor === currentUserId && order.status === 1)
+  } catch (err) {
+    console.error('Failed to refresh tasks:', err)
+  }
 }
 
 // 图片上传成功
