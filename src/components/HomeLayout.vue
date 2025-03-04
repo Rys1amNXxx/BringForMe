@@ -433,6 +433,7 @@ function handleUploadSuccess(response, _file, _fileListRef) {
   console.log('Upload success:', response)
   if (response.status === 'ok') {
     newPostImageUrl.value = response.url
+    console.log('New image URL:', newPostImageUrl.value)
   } else {
     ElMessage.error('Upload failed')
   }
