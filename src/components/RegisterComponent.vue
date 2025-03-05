@@ -99,6 +99,9 @@ const rules = {
   ],
   phoneNumber: [
     { required: true, message: 'Please enter your phone number', trigger: 'blur' }
+  ],
+  countryCode: [
+    { required: true, message: 'Please enter your country code', trigger: 'blur' }
   ]
 
 }

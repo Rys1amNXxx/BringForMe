@@ -56,7 +56,7 @@ import { inject } from 'vue'
 const userStore = inject('user')
 
 const currentUserId = userStore.profile.id
-const currentUserNickname = userStore.profile.nickname
+// const currentUserNickname = userStore.profile.nickname
 
 const route = useRoute()
 
@@ -179,20 +179,36 @@ function fetchMessages(receiverId) {
 }
 
 // 从后端获取联系人列表
-function fetchContacts() {
-  return api.get('message/receiver/')
-    .then(response => {
-      const fetchedContacts = response.data.data || []
-      contacts.value = fetchedContacts
-      // 默认选中第一个联系人
-      if (contacts.value.length > 0 && !selectedContactId.value) {
-        selectedContactId.value = contacts.value[0].id
-        fetchMessages(selectedContactId.value)
+async function fetchContacts() {
+  try {
+    const response = await api.get('message/receiver/')
+    const fetchedContacts = response.data.data || []
+    contacts.value = fetchedContacts
+
+    // 如果后端只返回 { id, nickname }，需要再请求 /user/profile/{id} 获取 avatar
+    const userCache = {}
+    const promises = contacts.value.map(async (contact) => {
+      // 如果同一个 user_id 多次出现，可以做缓存
+      if (!userCache[contact.id]) {
+        const userRes = await api.get(`user/profile/${contact.id}/`)
+        console.log('User profile:', userRes.data)
+        userCache[contact.id] = userRes.data.data
       }
+      // 将 avatar 合并到 contact 对象里
+      contact.avatar = userCache[contact.id].avatar || null
     })
-    .catch(error => {
-      console.error('Error fetching contacts:', error)
-    })
+
+    // 等待所有请求完成
+    await Promise.all(promises)
+
+    // 默认选中第一个联系人
+    if (contacts.value.length > 0 && !selectedContactId.value) {
+      selectedContactId.value = contacts.value[0].id
+      fetchMessages(selectedContactId.value)
+    }
+  } catch (error) {
+    console.error('Error fetching contacts:', error)
+  }
 }
 
 // 组件挂载时
