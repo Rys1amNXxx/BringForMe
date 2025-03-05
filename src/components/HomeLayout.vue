@@ -94,6 +94,9 @@
               <el-form-item label="Default">
                 <el-switch v-model="newAddress.is_default"></el-switch>
               </el-form-item>
+              <el-form-item label="Country Code">
+                <el-input v-model="newAddress.country_code"></el-input>
+              </el-form-item>
               <el-form-item>
                 <el-button type="primary" @click="isEditing ? updateAddress() : addAddress()">
                   {{ isEditing ? "Update Address" : "Add Address" }}
@@ -227,7 +230,7 @@ const newAddress = ref({
   address: '',
   remark: '',
   postcode: '',
-  country_code: '86',
+  country_code: '',
   phone: '',
   is_default: false,
   contact_person: ''
