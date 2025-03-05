@@ -86,7 +86,7 @@
 }
 
 .rewardLabel {
-  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif
+  font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif
 }
 
 .reward-box {
@@ -115,11 +115,18 @@
   color: #999;
   margin-left: 10px;
 }
+
 .scrollbar {
   height: 100vh;
   overflow-y: auto;
   width: 100%;
 }
+
 .address-card.selected {
   border: 2px solid #409EFF;
+}
+
+.postUserNickname {
+  font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  font-weight: bold;
 }

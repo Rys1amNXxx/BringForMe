@@ -6,21 +6,31 @@
         <el-input type="textarea" resize="none" placeholder="What's happening?" v-model="newPostContent"
           :autosize="{ minRows: 1, maxRows: 4 }" style="width: 100%;" />
         <div class="reward-box">
-          <span class="rewardLabel">Task reward-box(￡):</span>
+          <span class="rewardLabel">Order Reward(￡):</span>
           <el-input-number v-model="taskReward" :min="0" :step="1" placeholder="Enter reward" class="rewardInput" />
         </div>
-        <!-- 图片上传：改为后端最新接口 /api/v1/media_manager/image/ -->
-        <el-upload class="picture-upload" v-model:file-list="fileList" action="/api/v1/media-manager/image/"
-          list-type="picture" :on-preview="handlePictureCardPreview" :on-remove="handleUploadRemove"
-          :on-success="handleUploadSuccess" :headers="uploadHeaders">
+        <!-- 图片上传 -->
+        <el-upload 
+        class="picture-upload" 
+        v-model:file-list="fileList" 
+        action="/api/v1/media-manager/image/"
+        list-type="picture" 
+        :on-preview="handlePictureCardPreview" 
+        :on-remove="handleUploadRemove"
+        :on-success="handleUploadSuccess" 
+        :headers="uploadHeaders"
+        :multiple="true"
+        :limit="4"
+        name="images"
+        >
           <el-button type="primary">Upload</el-button>
-          <template #tip>
+          <!-- <template #tip>
             <div class="el-upload__tip">
               jpg/png files with a size less than 500kb
             </div>
-          </template>
+          </template> -->
         </el-upload>
-
+        <!-- Post Actions -->
         <div class="post-actions">
           <el-button type="primary" @click="openAddressDialog" class="postButton">Post</el-button>
         </div>
@@ -109,7 +119,7 @@
             <el-avatar :size="40" :src="defaultAvatar" style="margin-right: 10px;" />
             <div class="post-user">
               <!-- 以前 post.user.name 改为 order.user_id 或其它字段 -->
-              <strong>{{ order.nickname }}</strong>
+              <p class="postUserNickname">{{ order.nickname }}</p>
               <!-- 以前 post.time 改为 order.created_at 或 updated_at -->
               <p class="post-time">Created: {{ order.created_at }}</p>
             </div>
@@ -123,7 +133,7 @@
             <!-- 如果后端返回 image_urls 数组，遍历展示所有图片 -->
             <div v-if="order.image_urls && order.image_urls.length">
               <div v-for="(imgUrl, idx) in order.image_urls" :key="idx" class="image-wrapper">
-                <img :src="imgUrl" alt="Order Image" class="post-image" />
+                <img :src="getFullUrl(imgUrl)" alt="Order Image" class="post-image" />
               </div>
             </div>
 
@@ -159,6 +169,7 @@ import api from '@/api.js'
 import defaultAvatar from '@/assets/avatar/defaultAvatar.jpeg'
 import _ from 'lodash'
 const currentUserId = parseInt(localStorage.getItem('userId') || '0', 10)
+const backendBaseUrl = 'http://localhost:8000'
 
 // 上传头（如果你有全局拦截器，el-upload 默认不会走拦截器，需手动添加）
 const uploadHeaders = {
@@ -168,8 +179,10 @@ const uploadHeaders = {
 const router = useRouter()
 const newPostContent = ref('')
 const taskReward = ref(0)
-const newPostImageUrl = ref('')
+// const newPostImageUrl = ref('')
 const fileList = ref([])
+// const newPostImageUrls = ref([])
+const newPostImageIds = ref([])
 
 // const user_id = localStorage.getItem('user_id') || 1 // 或从后端获取
 
@@ -220,6 +233,11 @@ const newAddress = ref({
   contact_person: ''
 })
 
+function getFullUrl(relativePath) {
+    // 如果后端直接返回 '/media/xxx.png'，就拼接一下
+    return backendBaseUrl + relativePath
+  }
+
 // 打开地址弹窗
 function openAddressDialog() {
   if (!newPostContent.value.trim()) {
@@ -236,6 +254,7 @@ function openAddressDialog() {
 import axios from 'axios'
 const CancelToken = axios.CancelToken
 let cancelFetchOrders = null
+
 async function fetchOrders() {
   try {
     const res = await api.get('order/',{
@@ -350,7 +369,7 @@ function createOrderWithSelectedAddress() {
   newOrder.value.description = newPostContent.value
   newOrder.value.commission = taskReward.value
   // 如果上传成功返回的是图片 URL，则放到 images 数组中
-  newOrder.value.images = newPostImageUrl.value ? [newPostImageUrl.value] : []
+  newOrder.value.images = newPostImageIds.value
 
   // 发起请求创建订单
   api.post('order/', newOrder.value, {
@@ -497,9 +516,10 @@ async function refreshTasks() {
 // eslint-disable-next-line no-unused-vars
 function handleUploadSuccess(response, _file, _fileListRef) {
   console.log('Upload success:', response)
-  if (response.status === 'ok') {
-    newPostImageUrl.value = response.url
-    console.log('New image URL:', newPostImageUrl.value)
+  if (response.status === 'ok' && response.data && response.data.length) {
+    const {id} = response.data[0]
+    newPostImageIds.value.push(id)
+    console.log('Collected image IDs:', newPostImageIds.value)
   } else {
     ElMessage.error('Upload failed')
   }
@@ -509,7 +529,13 @@ function handleUploadSuccess(response, _file, _fileListRef) {
 // eslint-disable-next-line no-unused-vars
 function handleUploadRemove(file, _fileListRef) {
   console.log('Remove file:', file)
-  newPostImageUrl.value = ''
+  if (file.response && file.response.data && file.response.data.length) {
+    const imageId = file.response.data[0].id
+    const index = newPostImageIds.value.indexOf(imageId)
+    if (index !== -1) {
+      newPostImageIds.value.splice(index, 1)
+    }
+  }
 }
 
 // 预览图片
@@ -520,8 +546,9 @@ function handlePictureCardPreview(file) {
 // 重置表单
 function resetForm() {
   newPostContent.value = ''
-  newPostImageUrl.value = ''
+  // newPostImageUrl 不再使用，可忽略
   fileList.value = []
+  newPostImageIds.value = []  // 清空已收集的图片 ID
 }
 
 // 重置新地址表单

@@ -8,7 +8,7 @@
       <!-- 头像上传 -->
       <div class="avatar-section">
         <el-avatar :size="100" :src="user.avatar || default_avatar" class="avatar" />
-        <el-upload action="/api/v1/media_manager/image/" :show-file-list="false" :on-success="handleAvatarSuccess"
+        <el-upload action="/api/v1/media-manager/image/" :show-file-list="false" :on-success="handleAvatarSuccess"
           :before-upload="beforeAvatarUpload" :headers="uploadHeaders">
           <el-button type="primary">Change Avatar</el-button>
         </el-upload>
@@ -171,10 +171,13 @@ function handleLogout() {
 // 头像上传成功回调
 function handleAvatarSuccess(response) {
   // 假设服务器返回头像 URL 在 response.url
-  if (response && response.url) {
-    user.avatar = response.url
+  if (response.status === 'ok' && response.data && response.data.length) {
+    const avatarUrl = response.data[0].image
+    user.avatar = avatarUrl
     localStorage.setItem('user', JSON.stringify(user))
     ElMessage.success('Avatar updated successfully!')
+  }else{
+    ElMessage.error('Failed to update avatar.')
   }
 }
 
