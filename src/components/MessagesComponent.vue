@@ -55,6 +55,7 @@ import { inject } from 'vue'
 
 const userStore = inject('user')
 
+const currentUserId = userStore.profile.id
 const currentUserNickname = userStore.profile.nickname
 
 const route = useRoute()
@@ -123,7 +124,7 @@ function sendMessage() {
       if (responseData.status === 'ok' && Array.isArray(responseData.data)) {
         responseData.data.forEach(msg => {
           // const originalSender = msg.sender
-          const isMe = (msg.sender === currentUserNickname)
+          const isMe = (msg.sender === currentUserId)
           msg.sender = isMe ? 'me' : 'them'
           // console.log('Original sender:', originalSender,
           //     '| currentUser:', currentUserNickname,
@@ -162,7 +163,7 @@ function fetchMessages(receiverId) {
       if (status === 'ok' && Array.isArray(data)) {
         data.forEach(msg => {
           console.log('Original sender:', msg.sender)
-          msg.sender = (msg.sender === currentUserNickname) ? 'me' : 'them'
+          msg.sender = (msg.sender === currentUserId) ? 'me' : 'them'
         })
         messagesMap.value[receiverId] = data
       } else {
@@ -201,9 +202,8 @@ onMounted(() => {
     if (route.query.newContact) {
       try {
         const newContact = JSON.parse(route.query.newContact)
-        // 检查必要字段，这里建议使用 && 而非 ||
         newContact.id = Number(newContact.id)
-        if (newContact.id || newContact.nickname) {
+        if (newContact.id && newContact.nickname) {
           // 如果列表中没有该联系人，则添加
           if (!contacts.value.find(c => c.id === newContact.id)) {
             contacts.value.push(newContact)

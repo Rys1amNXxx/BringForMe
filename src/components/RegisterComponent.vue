@@ -17,6 +17,7 @@
         </el-form-item>
         <el-form-item label="Password" prop="password">
           <el-input type="password" v-model="registerForm.password" placeholder="Enter your password"></el-input>
+          <p style="font-size: smaller;color: lightgray;">The password must contain lowercase and uppercase letters, numbers, and special characters.</p>
         </el-form-item>
         <el-form-item label="Confirm Password" prop="confirmPassword">
           <el-input type="password" v-model="registerForm.confirmPassword"

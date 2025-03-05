@@ -152,11 +152,12 @@
 </template>
 
 <script setup>
-import { inject, ref, onMounted } from 'vue'
+import { onBeforeUnmount, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/api.js'
 import defaultAvatar from '@/assets/avatar/defaultAvatar.jpeg'
+import _ from 'lodash'
 const currentUserId = parseInt(localStorage.getItem('userId') || '0', 10)
 
 // 上传头（如果你有全局拦截器，el-upload 默认不会走拦截器，需手动添加）
@@ -169,6 +170,7 @@ const newPostContent = ref('')
 const taskReward = ref(0)
 const newPostImageUrl = ref('')
 const fileList = ref([])
+
 // const user_id = localStorage.getItem('user_id') || 1 // 或从后端获取
 
 
@@ -231,9 +233,16 @@ function openAddressDialog() {
   addressDialogVisible.value = true
 }
 
+import axios from 'axios'
+const CancelToken = axios.CancelToken
+let cancelFetchOrders = null
 async function fetchOrders() {
   try {
-    const res = await api.get('order/')
+    const res = await api.get('order/',{
+      cancelToken: new CancelToken(c => {
+        cancelFetchOrders = c
+      })
+    })
     const allOrders = res.data.data || []
     orders.value = allOrders
 
@@ -532,9 +541,21 @@ function resetNewAddressForm() {
   selectedAddress.value = null
 }
 
+const throttleFetchOrders = _.throttle(fetchOrders, 60000)
+
+let pollingTimer = null
 // 组件挂载时获取最新订单列表
 onMounted(() => {
   fetchOrders()
+  pollingTimer = setInterval(() => {
+    throttleFetchOrders()
+  }, 60000)
+})
+
+// 组件卸载时清除定时器
+onBeforeUnmount(() => {
+  if (pollingTimer) clearInterval(pollingTimer)
+  if (cancelFetchOrders) cancelFetchOrders('Component unmounted, canceling request.')
 })
 </script>
 
