@@ -84,20 +84,23 @@ const editForm = ref({
 })
 
 // 组件挂载时获取所有订单并进行筛选
-onMounted(async () => {
+async function refreshTasks() {
   try {
     const currentUserId = parseInt(localStorage.getItem('userId') || '0', 10)
-
     const res = await api.get('order/')
     const allOrders = res.data.data || []
-
     publishedTasks.value = allOrders.filter(order => order.user_id === currentUserId)
     acceptedTasks.value = allOrders.filter(order => order.acceptor === currentUserId && order.status === 1)
   } catch (err) {
-    console.error('Failed to fetch orders:', err)
+    console.error('Failed to refresh tasks:', err)
     ElMessage.error('Failed to fetch orders')
   }
+}
+
+onMounted(() => {
+  refreshTasks()
 })
+
 
 function openEditDialog(order) {
   editForm.value = {
@@ -133,17 +136,17 @@ async function updateTask() {
   }
 }
 
-async function refreshTasks() {
-  try {
-    const currentUserId = parseInt(localStorage.getItem('userId') || '0', 10)
-    const res = await api.get('order/')
-    const allOrders = res.data.data || []
-    publishedTasks.value = allOrders.filter(o => o.user_id === currentUserId)
-    acceptedTasks.value = allOrders.filter(o => o.acceptor === currentUserId && o.status === 1)
-  } catch (err) {
-    console.error('Failed to refresh tasks:', err)
-  }
-}
+// async function refreshTasks() {
+//   try {
+//     const currentUserId = parseInt(localStorage.getItem('userId') || '0', 10)
+//     const res = await api.get('order/')
+//     const allOrders = res.data.data || []
+//     publishedTasks.value = allOrders.filter(o => o.user_id === currentUserId)
+//     acceptedTasks.value = allOrders.filter(o => o.acceptor === currentUserId && o.status === 1)
+//   } catch (err) {
+//     console.error('Failed to refresh tasks:', err)
+//   }
+// }
 
 function deleteOrder(order) {
   // 弹出确认框

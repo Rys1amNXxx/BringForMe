@@ -469,9 +469,11 @@ function contactNow(order) {
 // 接受任务
 async function handleAccept(order) {
   try {
+    // 获取当前用户ID
     const currentUserId = parseInt(localStorage.getItem('userId') || '0', 10)
+    // 构造 payload，将状态更新为 1 (Order Accepted) 并设置当前用户为接单人
     const payload = {
-      status: 1,  // 1 表示 Order Accepted
+      status: 1,        // 1 表示“Order Accepted”
       acceptor: currentUserId
     }
     const res = await api.patch(`order/${order.id}/`, payload, {
@@ -479,7 +481,8 @@ async function handleAccept(order) {
     })
     if (res.data.status === 'ok') {
       ElMessage.success('Task accepted successfully')
-      refreshTasks()
+      // 刷新任务列表，重新计算 acceptedTasks
+      await refreshTasks()
     } else {
       ElMessage.error(res.data.message || 'Failed to accept task')
     }
@@ -489,25 +492,32 @@ async function handleAccept(order) {
   }
 }
 
+// 刷新任务列表，重新获取所有订单，并更新 publishedTasks 与 acceptedTasks
 async function refreshTasks() {
   try {
     const res = await api.get('order/')
     const allOrders = res.data.data || []
     orders.value = allOrders
 
-    // 利用缓存获取发布者信息（与 fetchOrders 中相同逻辑）
+    // 使用缓存避免重复请求发布者信息
     const userCache = {}
     const promises = orders.value.map(async (order) => {
       const uid = order.user_id
       if (!userCache[uid]) {
-        const userRes = await api.get(`user/profile/${uid}/`)
-        userCache[uid] = userRes.data.data
+        try {
+          const userRes = await api.get(`user/profile/${uid}/`)
+          userCache[uid] = userRes.data.data
+        } catch (err) {
+          console.error(`Failed to fetch profile for user ${uid}:`, err)
+          userCache[uid] = { nickname: 'Unknown', avatar: defaultAvatar }
+        }
       }
       order.nickname = userCache[uid].nickname
       order.avatar = userCache[uid].avatar
     })
     await Promise.all(promises)
-
+    
+    // 根据当前用户ID筛选任务
     publishedTasks.value = orders.value.filter(order => order.user_id === currentUserId)
     acceptedTasks.value = orders.value.filter(order => order.acceptor === currentUserId && order.status === 1)
   } catch (err) {
