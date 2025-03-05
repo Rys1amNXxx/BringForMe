@@ -116,7 +116,7 @@
         <div v-for="order in orders" :key="order.id" class="post-item">
           <div class="post-header">
             <!-- 使用默认头像 -->
-            <el-avatar :size="40" :src="defaultAvatar" style="margin-right: 10px;" />
+            <el-avatar :size="40" :src="order.avatar || defaultAvatar" style="margin-right: 10px;" />
             <div class="post-user">
               <!-- 以前 post.user.name 改为 order.user_id 或其它字段 -->
               <p class="postUserNickname">{{ order.nickname }}</p>

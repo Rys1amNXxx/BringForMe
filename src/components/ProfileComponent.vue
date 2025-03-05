@@ -7,9 +7,15 @@
     <div v-if="user && Object.keys(user).length" class="user-info">
       <!-- 头像上传 -->
       <div class="avatar-section">
-        <el-avatar :size="100" :src="user.avatar || default_avatar" class="avatar" />
-        <el-upload action="/api/v1/media-manager/image/" :show-file-list="false" :on-success="handleAvatarSuccess"
-          :before-upload="beforeAvatarUpload" :headers="uploadHeaders">
+        <el-avatar :size="100" :src="user.profile.avatar || default_avatar" class="avatar" />
+        <el-upload 
+        action="/api/v1/media-manager/image/" 
+        :show-file-list="false" 
+        :on-success="handleAvatarSuccess"
+        :before-upload="beforeAvatarUpload" 
+        :headers="uploadHeaders"
+        name="avatar"
+        >
           <el-button type="primary">Change Avatar</el-button>
         </el-upload>
       </div>
@@ -117,6 +123,7 @@ onMounted(() => {
   }
 })
 
+
 // 保存编辑后的用户信息
 async function saveProfile() {
   try {
@@ -170,14 +177,26 @@ function handleLogout() {
 
 // 头像上传成功回调
 function handleAvatarSuccess(response) {
-  // 假设服务器返回头像 URL 在 response.url
   if (response.status === 'ok' && response.data && response.data.length) {
-    const avatarUrl = response.data[0].image
-    user.avatar = avatarUrl
-    localStorage.setItem('user', JSON.stringify(user))
-    ElMessage.success('Avatar updated successfully!')
-  }else{
-    ElMessage.error('Failed to update avatar.')
+    const avatarUrl = response.data[0].image;
+    // 调用更新用户资料接口，将 avatar 字段写入数据库
+    api.patch('user/profile/', { avatar: avatarUrl })
+      .then((res) => {
+        if (res.status >= 200 && res.status < 300) {
+          // 更新全局用户状态
+          user.avatar = avatarUrl;
+          localStorage.setItem('userProfile', JSON.stringify(user));
+          ElMessage.success('Avatar updated successfully!');
+        } else {
+          ElMessage.error('Failed to update avatar.');
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        ElMessage.error('Failed to update avatar.');
+      });
+  } else {
+    ElMessage.error('Failed to upload avatar.');
   }
 }
 
