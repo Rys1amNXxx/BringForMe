@@ -289,7 +289,7 @@ async function fetchOrders() {
     await Promise.all(promises)
     publishedTasks.value = orders.value.filter(order => order.user_id === currentUserId)
     acceptedTasks.value = orders.value.filter(order => order.acceptor === currentUserId && order.status === 1)
-    console.log('Orders with publisher info:', orders.value)
+    // console.log('Orders with publisher info:', orders.value)
   } catch (err) {
     console.error('Failed to fetch orders:', err)
     ElMessage.error('Failed to fetch orders')
@@ -301,7 +301,7 @@ function getAddressList() {
   // 假设 user_id 为 1 或实际获取
   api.get(`user/address/`)
     .then((res) => {
-      console.log('Address response:', res.data)
+      // console.log('Address response:', res.data)
       addressList.value = res.data.status === 'ok' ? res.data.data : []
     })
     .catch((err) => {

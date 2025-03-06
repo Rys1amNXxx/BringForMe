@@ -8,7 +8,7 @@
             <div v-for="order in acceptedTasks" :key="order.id" class="task-item">
               <h3>Order #{{ order.id }}</h3>
               <p>Description: {{ order.description }}</p>
-              <p>Status: {{ order.status }}</p>
+              <p>Status: {{ order.status === 1? 'Accepted' : 'Awaiting Accept' }}</p>
               <p class="reward">Reward: ￡{{ order.commission }}</p>
               <p>Acceptor: {{ order.acceptor }}</p>
             </div>
@@ -28,7 +28,7 @@
             <div v-for="order in publishedTasks" :key="order.id" class="task-item">
               <h3>Order #{{ order.id }}</h3>
               <p>Description: {{ order.description }}</p>
-              <p>Status: {{ order.status }}</p>
+              <p>Status: {{ order.status === 1? 'Accepted' : 'Awaiting Accept' }}</p>
               <p class="reward">Reward: ￡{{ order.commission }}</p>
               <p>Acceptor: {{ order.acceptor }}</p>
               <el-button type="primary" @click="openEditDialog(order)">Edit</el-button>

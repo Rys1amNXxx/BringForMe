@@ -162,7 +162,7 @@ function fetchMessages(receiverId) {
       const { data, status } = response.data
       if (status === 'ok' && Array.isArray(data)) {
         data.forEach(msg => {
-          console.log('Original sender:', msg.sender)
+          // console.log('Original sender:', msg.sender)
           msg.sender = (msg.sender === currentUserId) ? 'me' : 'them'
         })
         messagesMap.value[receiverId] = data
