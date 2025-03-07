@@ -5,15 +5,15 @@
 <script setup>
 import { ref, provide } from 'vue'
 
-// 定义一个响应式的已接受任务数组
+// define a ref to store accepted tasks
 const acceptedTasks = ref([])
 
-// 定义一个添加任务的方法
+// define a function to add accepted tasks
 function addAcceptedTask(task) {
   acceptedTasks.value.push(task)
 }
 
-// 通过 provide 注入状态和方法，供后代组件使用
+// provide the accepted tasks and addAcceptedTask function
 provide('acceptedTasks', acceptedTasks)
 provide('addAcceptedTask', addAcceptedTask)
 </script>

@@ -70,6 +70,7 @@ const registerForm = reactive({
 
 const registerFormRef = ref(null)
 
+// form validation rules
 const rules = {
   username: [
     { required: true, message: 'Please enter your username', trigger: 'blur' }
@@ -106,6 +107,7 @@ const rules = {
 
 }
 
+// register function
 function handleRegister() {
   registerFormRef.value.validate((valid) => {
     if (valid) {
@@ -147,6 +149,7 @@ function handleRegister() {
   })
 }
 
+// reset form
 function resetForm() {
   registerForm.username = ''
   registerForm.email = ''

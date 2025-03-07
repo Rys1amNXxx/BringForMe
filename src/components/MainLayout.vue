@@ -57,12 +57,14 @@ import default_avatar from '../assets/avatar/defaultAvatar.jpeg'
 const router = useRouter()
 const userStore = inject('user')
 
+//logout function
 function handleLogout() {
   localStorage.removeItem('accessToken')
   localStorage.removeItem('userId')
   router.push({ name: 'Login' })
 }
 
+//go to profile function
 function goToProfile() {
   router.push('/profile')
 }

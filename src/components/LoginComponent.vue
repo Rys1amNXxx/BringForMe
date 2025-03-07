@@ -70,12 +70,12 @@ function refreshToken() {
 }
 
 async function handleLogin() {
-  // 使用 validate 回调进行表单校验
+  // use validate() method to validate the form
   loginFormRef.value.validate(async (valid) => {
     if (!valid) return
 
     try {
-      // 登录接口：获取 access 与 refresh token
+      // login API
       const res = await api.post(
         'user/token/',
         {
@@ -87,21 +87,21 @@ async function handleLogin() {
       
       const accessToken = res.data.access
       if (accessToken) {
-        // 存储 Token
+        // store tokens in localStorage
         localStorage.setItem('accessToken', accessToken)
         localStorage.setItem('refreshToken', res.data.refresh)
         ElMessage.success('Login successful')
 
-        // 解析 JWT，获取 payload（例如 user_id 等信息）
+        // store user ID in localStorage
         const payload = parseJwt(accessToken)
         if (payload && payload.user_id) {
           localStorage.setItem('userId', payload.user_id)
         }
         
-        // 每5分钟刷新一次 Token
+        //  refresh token every 5 minutes
         setInterval(refreshToken, 1000 * 60 * 5)
 
-        // 获取用户资料
+        // get user profile
         // const userId = localStorage.getItem('userId')
         const profileRes = await api.get(`user/profile/`)
         const userInfo = profileRes.data.data
@@ -109,7 +109,7 @@ async function handleLogin() {
         // userStore.profile = profileRes.data.data || profileRes.data
         localStorage.setItem('userProfile', JSON.stringify(userInfo))
         
-        // 跳转到主页
+        // redirect to home page
         router.push('/').then(() => {
           console.log('Redirected to home page successfully')
         }).catch((err) => {

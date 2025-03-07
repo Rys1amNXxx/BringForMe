@@ -3,9 +3,9 @@
     <h2 style="font-weight: bold">Profile Page</h2>
     <p>Here is your personal info...</p>
 
-    <!-- 用户信息展示 -->
+    <!-- user Profile -->
     <div v-if="user && Object.keys(user).length" class="user-info">
-      <!-- 头像上传 -->
+      <!-- upload avatar -->
       <div class="avatar-section">
         <el-avatar :size="100" :src="user.profile.avatar || default_avatar" class="avatar" />
         <el-upload 
@@ -28,7 +28,7 @@
     </div>
     <p v-else>No user data found.</p>
 
-    <!-- 编辑用户信息的弹窗 -->
+    <!-- edit profile dialog -->
     <el-dialog v-model="isEditing" title="Edit Profile">
       <el-form :model="editForm">
         <el-form-item label="Nickname">
@@ -44,7 +44,7 @@
       </template>
     </el-dialog>
 
-    <!-- 修改密码的弹窗 -->
+    <!-- change password dialog -->
     <el-dialog v-model="isEditingPassword" title="Change Password">
       <el-form :model="passwordForm" :rules="passwordRules" ref="passwordFormRef">
         <el-form-item label="Old Password" prop="oldPassword">
@@ -72,7 +72,7 @@ import { ElMessage } from 'element-plus'
 import default_avatar from '@/assets/avatar/defaultAvatar.jpeg'
 import api from '@/api.js'
 
-// 获取全局用户状态（例如在 App.vue 中通过 provide('user', userStore) 提供）
+// fetch user data from App.vue provide
 const user = inject('user')
 if (!user) {
   console.error('No user data found. Please check App.vue provide setup.')
@@ -80,12 +80,12 @@ if (!user) {
 
 const router = useRouter()
 
-// 上传头（el-upload不走 axios 拦截器）
+// upload avatar headers
 const uploadHeaders = {
   Authorization: `Bearer ${localStorage.getItem('accessToken') || ''}`
 }
 
-// 编辑状态和表单数据
+// edit profile form data
 const isEditing = ref(false)
 const isEditingPassword = ref(false)
 const editForm = ref({
@@ -115,7 +115,7 @@ const passwordRules = {
   ]
 }
 
-// 页面加载时初始化编辑表单数据
+// init edit form data
 onMounted(() => {
   if (user && user.profile) {
     editForm.value.nickname = user.profile.nickname || ''
@@ -124,7 +124,7 @@ onMounted(() => {
 })
 
 
-// 保存编辑后的用户信息
+// save edited profile
 async function saveProfile() {
   try {
     const updateData = {
@@ -132,7 +132,7 @@ async function saveProfile() {
       email: editForm.value.email
     }
     await api.patch('/user/profile/', updateData)
-    // 再发 GET 请求获取最新用户信息
+    // update user profile data
     const response = await api.get('/user/profile/')
     const updatedProfile = response.data
     Object.assign(user.profile, updatedProfile)
@@ -145,7 +145,7 @@ async function saveProfile() {
   }
 }
 
-// 保存修改后的密码
+// save password
 async function savePassword() {
   try {
     const passwordData = {
@@ -167,7 +167,7 @@ async function savePassword() {
   }
 }
 
-// 退出登录
+// logout function
 function handleLogout() {
   localStorage.removeItem('user')
   localStorage.removeItem('accessToken')
@@ -175,15 +175,14 @@ function handleLogout() {
   router.push({ name: 'Login' })
 }
 
-// 头像上传成功回调
+// handle avatar upload success
 function handleAvatarSuccess(response) {
   if (response.status === 'ok' && response.data && response.data.length) {
     const avatarUrl = response.data[0].image;
-    // 调用更新用户资料接口，将 avatar 字段写入数据库
+    // update avatar
     api.patch('user/profile/', { avatar: avatarUrl })
       .then((res) => {
         if (res.status >= 200 && res.status < 300) {
-          // 更新全局用户状态
           user.avatar = avatarUrl;
           localStorage.setItem('userProfile', JSON.stringify(user));
           ElMessage.success('Avatar updated successfully!');
@@ -200,7 +199,7 @@ function handleAvatarSuccess(response) {
   }
 }
 
-// 头像上传前验证
+// before avatar upload
 function beforeAvatarUpload(file) {
   const isImage = file.type.startsWith('image/')
   if (!isImage) {

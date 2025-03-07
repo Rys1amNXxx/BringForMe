@@ -44,7 +44,7 @@
       </el-tab-pane>
     </el-tabs>
 
-    <!-- 编辑订单对话框 -->
+    <!-- edit dialog -->
     <el-dialog v-model="editDialogVisible" title="Edit Task">
       <el-form :model="editForm" label-width="120px">
         <el-form-item label="Description">
@@ -53,7 +53,6 @@
         <el-form-item label="Commission">
           <el-input-number v-model="editForm.commission" :min="0" />
         </el-form-item>
-        <!-- 你也可添加其他字段，如 destination，images 等 -->
       </el-form>
       <template #footer>
         <el-button @click="editDialogVisible = false">Cancel</el-button>
@@ -68,10 +67,10 @@ import { ref, onMounted } from 'vue'
 import { ElMessage,ElMessageBox } from 'element-plus'
 import api from '@/api.js'
 
-// 当前选中的标签页
+// current active tab
 const activeTab = ref('accepted')
 
-// 存储筛选后的订单列表
+// accepted and published tasks
 const acceptedTasks = ref([])
 const publishedTasks = ref([])
 
@@ -83,7 +82,7 @@ const editForm = ref({
   commission: 0
 })
 
-// 组件挂载时获取所有订单并进行筛选
+// when component is mounted, fetch tasks and classify them
 async function refreshTasks() {
   try {
     const currentUserId = parseInt(localStorage.getItem('userId') || '0', 10)
@@ -113,19 +112,19 @@ function openEditDialog(order) {
 
 async function updateTask() {
   try {
-    // 向后端 PATCH /order/{id}/
+    // patch /order/{id}/
     const payload = {
       description: editForm.value.description,
       commission: editForm.value.commission
     }
-    // 如果你想更新 destination、images 等，也加进 payload
+    // if the order is accepted, set status to 1
     const res = await api.patch(`order/${editForm.value.id}/`, payload, {
       headers: { 'Content-Type': 'application/json' }
     })
     if (res.data.status === 'ok') {
       ElMessage.success('Task updated successfully')
       editDialogVisible.value = false
-      // 更新前端显示
+      // update tasks
       refreshTasks()
     } else {
       ElMessage.error(res.data.message || 'Failed to update task')
@@ -149,7 +148,7 @@ async function updateTask() {
 // }
 
 function deleteOrder(order) {
-  // 弹出确认框
+  // open a confirmation dialog
   ElMessageBox.confirm(
     'Are you sure you want to delete this order?',
     'Delete Confirmation',
@@ -161,15 +160,11 @@ function deleteOrder(order) {
   )
     .then(async () => {
       try {
-        // 调用后端 DELETE /order/{id}/
         const res = await api.delete(`order/${order.id}/`)
-        // 如果后端成功返回 204 (No Content)
         if (res.status >= 200 && res.status < 300) {
           ElMessage.success('Order deleted successfully')
-          // 从 publishedTasks 中移除这条记录，或重新 fetchOrders()
           publishedTasks.value = publishedTasks.value.filter(o => o.id !== order.id)
         } else {
-          // 若后端返回别的状态或 body
           ElMessage.error('Failed to delete order')
         }
       } catch (err) {
@@ -178,7 +173,6 @@ function deleteOrder(order) {
       }
     })
     .catch(() => {
-      // 用户取消删除
     })
 }
 

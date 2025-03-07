@@ -324,7 +324,7 @@ function addAddress() {
     })
 }
 
-// 编辑地址
+// edit address
 function startEditing(addr) {
   newAddress.value = { ...addr }
   isEditing.value = true
@@ -332,7 +332,7 @@ function startEditing(addr) {
   activeTab.value = 'add'
 }
 
-// 确认所选地址并发起任务发布
+// confirm selected address
 function confirmSelectedAddress() {
   if (!selectedAddress.value) {
     ElMessage.warning('Please select an address')
@@ -343,7 +343,6 @@ function confirmSelectedAddress() {
 }
 
 function createOrderWithSelectedAddress() {
-  // 把选中的地址对象合并到 newOrder.destination
   newOrder.value.destination = {
     tag: selectedAddress.value.tag,
     country: selectedAddress.value.country,
@@ -356,22 +355,18 @@ function createOrderWithSelectedAddress() {
     country_code: selectedAddress.value.country_code,
     phone: selectedAddress.value.phone
   }
-  // 赋值描述与奖励
   newOrder.value.description = newPostContent.value
   newOrder.value.commission = taskReward.value
-  // 如果上传成功返回的是图片 URL，则放到 images 数组中
   newOrder.value.images = newPostImageIds.value
 
-  // 发起请求创建订单
+  // post order
   api.post('order/', newOrder.value, {
     headers: { 'Content-Type': 'application/json' }
   })
     .then((res) => {
-      // 具体判断逻辑看后端返回
       if (res.status >= 200 && res.status < 300) {
         ElMessage.success('Post successful')
         resetForm()
-        // 刷新订单列表
         fetchOrders()
       } else {
         ElMessage.error('Failed to post')
@@ -383,7 +378,7 @@ function createOrderWithSelectedAddress() {
     })
 }
 
-// 更新地址
+// update address
 function updateAddress() {
   if (!editingAddressId.value) {
     ElMessage.error('No address ID found')
@@ -410,7 +405,7 @@ function updateAddress() {
     })
 }
 
-// 删除地址
+// delete address
 function deleteAddress(addrId) {
   ElMessageBox.confirm(
     'Are you sure you want to delete this address?',
@@ -437,11 +432,10 @@ function deleteAddress(addrId) {
         })
     })
     .catch(() => {
-      // 用户取消删除
     })
 }
 
-// 联系任务发布者
+// contact now
 function contactNow(order) {
   const newContact = {
     id: order.user_id,
@@ -454,14 +448,14 @@ function contactNow(order) {
   })
 }
 
-// 接受任务
+// accept task
 async function handleAccept(order) {
   try {
-    // 获取当前用户ID
+    // fetch current user ID
     const currentUserId = parseInt(localStorage.getItem('userId') || '0', 10)
-    // 构造 payload，将状态更新为 1 (Order Accepted) 并设置当前用户为接单人
+    // create payload for patch request
     const payload = {
-      status: 1,        // 1 表示“Order Accepted”
+      status: 1,
       acceptor: currentUserId
     }
     const res = await api.patch(`order/${order.id}/`, payload, {
@@ -469,7 +463,6 @@ async function handleAccept(order) {
     })
     if (res.data.status === 'ok') {
       ElMessage.success('Task accepted successfully')
-      // 刷新任务列表，重新计算 acceptedTasks
       await refreshTasks()
     } else {
       ElMessage.error(res.data.message || 'Failed to accept task')
@@ -480,14 +473,14 @@ async function handleAccept(order) {
   }
 }
 
-// 刷新任务列表，重新获取所有订单，并更新 publishedTasks 与 acceptedTasks
+// refresh tasks
 async function refreshTasks() {
   try {
     const res = await api.get('order/')
     const allOrders = res.data.data || []
     orders.value = allOrders
 
-    // 使用缓存避免重复请求发布者信息
+    // fetch user profile for each order
     const userCache = {}
     const promises = orders.value.map(async (order) => {
       const uid = order.user_id
@@ -505,7 +498,7 @@ async function refreshTasks() {
     })
     await Promise.all(promises)
     
-    // 根据当前用户ID筛选任务
+    // classify tasks
     publishedTasks.value = orders.value.filter(order => order.user_id === currentUserId)
     acceptedTasks.value = orders.value.filter(order => order.acceptor === currentUserId && order.status === 1)
   } catch (err) {
@@ -513,7 +506,7 @@ async function refreshTasks() {
   }
 }
 
-// 图片上传成功
+// upload success
 // eslint-disable-next-line no-unused-vars
 function handleUploadSuccess(response, _file, _fileListRef) {
   console.log('Upload success:', response)
@@ -526,7 +519,7 @@ function handleUploadSuccess(response, _file, _fileListRef) {
   }
 }
 
-// 图片移除
+// upload remove
 // eslint-disable-next-line no-unused-vars
 function handleUploadRemove(file, _fileListRef) {
   console.log('Remove file:', file)
@@ -539,12 +532,12 @@ function handleUploadRemove(file, _fileListRef) {
   }
 }
 
-// 预览图片
+// picture card preview
 function handlePictureCardPreview(file) {
   console.log('Preview file:', file)
 }
 
-// 重置表单
+// reset form
 function resetForm() {
   newPostContent.value = ''
   // newPostImageUrl 不再使用，可忽略
@@ -552,7 +545,7 @@ function resetForm() {
   newPostImageIds.value = []  // 清空已收集的图片 ID
 }
 
-// 重置新地址表单
+// reset new address form
 function resetNewAddressForm() {
   newAddress.value = {
     tag: '',
@@ -572,7 +565,7 @@ function resetNewAddressForm() {
 const throttleFetchOrders = _.throttle(fetchOrders, 60000)
 
 let pollingTimer = null
-// 组件挂载时获取最新订单列表
+// when component is mounted, fetch orders
 onMounted(() => {
   fetchOrders()
   pollingTimer = setInterval(() => {
@@ -580,7 +573,7 @@ onMounted(() => {
   }, 60000)
 })
 
-// 组件卸载时清除定时器
+// when component is unmounted, clear interval
 onBeforeUnmount(() => {
   if (pollingTimer) clearInterval(pollingTimer)
   if (cancelFetchOrders) cancelFetchOrders('Component unmounted, canceling request.')
