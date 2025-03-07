@@ -58,7 +58,8 @@ const router = useRouter()
 const userStore = inject('user')
 
 function handleLogout() {
-  localStorage.removeItem('user')
+  localStorage.removeItem('accessToken')
+  localStorage.removeItem('userId')
   router.push({ name: 'Login' })
 }
 
