@@ -9,7 +9,7 @@
           <span class="rewardLabel">Order Reward(￡):</span>
           <el-input-number v-model="taskReward" :min="0" :step="1" placeholder="Enter reward" class="rewardInput" />
         </div>
-        <!-- 图片上传 -->
+        <!-- Image Upload -->
         <el-upload 
         class="picture-upload" 
         v-model:file-list="fileList" 
@@ -24,11 +24,6 @@
         name="images"
         >
           <el-button type="primary">Upload</el-button>
-          <!-- <template #tip>
-            <div class="el-upload__tip">
-              jpg/png files with a size less than 500kb
-            </div>
-          </template> -->
         </el-upload>
         <!-- Post Actions -->
         <div class="post-actions">
@@ -39,7 +34,7 @@
       <!-- Address Dialog -->
       <el-dialog v-model="addressDialogVisible" title="Choose your address" append-to-body width="600px">
         <el-tabs v-model="activeTab">
-          <!-- 已有地址列表 -->
+          <!-- Choose Address -->
           <el-tab-pane label="Select Address" name="select">
             <div v-if="addressList.length">
               <el-card v-for="addr in addressList" :key="addr.id" class="address-card" @click="selectAddress(addr)"
@@ -61,7 +56,7 @@
             </div>
           </el-tab-pane>
 
-          <!-- 添加新地址 -->
+          <!-- Add Address -->
           <el-tab-pane label="Add Address" name="add">
             <el-form :model="newAddress" label-width="120px" class="address-form">
               <el-form-item label="Tag">
@@ -113,45 +108,39 @@
         </template>
       </el-dialog>
 
-      <!-- Post List (适配新的 OrderModel 数据结构) -->
+      <!-- Post List -->
       <div class="post-list">
-        <!-- 这里的 posts 是在 onMounted 时从后端获取的 order 列表 -->
+        <!-- OnMount, fetch orders -->
         <div v-for="order in orders" :key="order.id" class="post-item">
           <div class="post-header">
-            <!-- 使用默认头像 -->
             <el-avatar :size="40" :src="order.avatar || defaultAvatar" style="margin-right: 10px;" />
             <div class="post-user">
-              <!-- 以前 post.user.name 改为 order.user_id 或其它字段 -->
               <p class="postUserNickname">{{ order.nickname }}</p>
-              <!-- 以前 post.time 改为 order.created_at 或 updated_at -->
               <p class="post-time">Created: {{ order.created_at }}</p>
             </div>
           </div>
 
-          <!-- Content of the post (适配新的字段) -->
+          <!-- Content of the post -->
           <div class="post-content">
-            <!-- 原先 post.content 改为 order.description -->
             <p>{{ order.description }}</p>
 
-            <!-- 如果后端返回 image_urls 数组，遍历展示所有图片 -->
+            <!-- if there are image_urls, for each image, display it -->
             <div v-if="order.image_urls && order.image_urls.length">
               <div v-for="(imgUrl, idx) in order.image_urls" :key="idx" class="image-wrapper">
                 <img :src="getFullUrl(imgUrl)" alt="Order Image" class="post-image" />
               </div>
             </div>
-
-            <!-- 如果有 destination 对象，显示地址信息 -->
             <div v-if="order.destination">
               <span class="displayAddress">Address: {{ order.destination.address }}</span>
-              <!-- 你也可以进一步展示 city, province, etc. -->
             </div>
 
-            <!-- 原先 post.reward 改为 order.commission -->
+            <!-- Reward -->
             <div class="post-reward">
               <el-tag type="success">Reward: ￡{{ order.commission }}</el-tag>
             </div>
           </div>
 
+          <!-- Post Footer -->
           <div class="post-footer">
             <template v-if="order.user_id !== currentUserId">
               <el-button size="small" type="primary" @click="contactNow(order)">Contact Now</el-button>
@@ -174,7 +163,7 @@ import _ from 'lodash'
 const currentUserId = parseInt(localStorage.getItem('userId') || '0', 10)
 const backendBaseUrl = 'http://localhost:8000'
 
-// 上传头（如果你有全局拦截器，el-upload 默认不会走拦截器，需手动添加）
+// uploadHeaders for image upload
 const uploadHeaders = {
   Authorization: `Bearer ${localStorage.getItem('accessToken') || ''}`
 }
@@ -187,7 +176,7 @@ const fileList = ref([])
 // const newPostImageUrls = ref([])
 const newPostImageIds = ref([])
 
-// const user_id = localStorage.getItem('user_id') || 1 // 或从后端获取
+
 
 
 
@@ -215,7 +204,7 @@ const newOrder = ref({
   images: []
 })
 
-// 地址弹窗
+// Address Dialog
 const addressDialogVisible = ref(false)
 const activeTab = ref('select')
 const addressList = ref([])
@@ -236,12 +225,12 @@ const newAddress = ref({
   contact_person: ''
 })
 
+// Fetch full URL for image
 function getFullUrl(relativePath) {
-    // 如果后端直接返回 '/media/xxx.png'，就拼接一下
     return backendBaseUrl + relativePath
   }
 
-// 打开地址弹窗
+// Open Address Dialog
 function openAddressDialog() {
   if (!newPostContent.value.trim()) {
     ElMessage.warning('Empty content')
@@ -258,6 +247,7 @@ import axios from 'axios'
 const CancelToken = axios.CancelToken
 let cancelFetchOrders = null
 
+// Fetch Orders
 async function fetchOrders() {
   try {
     const res = await api.get('order/',{
@@ -268,24 +258,23 @@ async function fetchOrders() {
     const allOrders = res.data.data || []
     orders.value = allOrders
 
-    // 使用缓存避免重复请求
+    // use cache to avoid duplicate requests for publisher info
     const userCache = {}
 
-    // 遍历订单，对每个订单获取发布者信息（如果没获取过）
+    // for each order, fetch publisher info
     const promises = orders.value.map(async (order) => {
       const uid = order.user_id
       if (!userCache[uid]) {
-        // 请求该发布者信息
+        // get user profile
         const userRes = await api.get(`user/profile/${uid}/`)
-        // 假设后端返回结构为 { status: 'ok', data: { nickname: ..., avatar: ... } }
         userCache[uid] = userRes.data.data
       }
-      // 合并用户资料到订单中
+      // assign nickname and avatar to order
       order.nickname = userCache[uid].nickname
       order.avatar = userCache[uid].avatar
     })
 
-    // 等待所有用户信息请求完成
+    // wait for all promises to resolve
     await Promise.all(promises)
     publishedTasks.value = orders.value.filter(order => order.user_id === currentUserId)
     acceptedTasks.value = orders.value.filter(order => order.acceptor === currentUserId && order.status === 1)
@@ -296,9 +285,8 @@ async function fetchOrders() {
   }
 }
 
-// 获取地址列表
+// fetch address list
 function getAddressList() {
-  // 假设 user_id 为 1 或实际获取
   api.get(`user/address/`)
     .then((res) => {
       // console.log('Address response:', res.data)
@@ -310,12 +298,12 @@ function getAddressList() {
     })
 }
 
-// 选择地址
+// choose address
 function selectAddress(addr) {
   selectedAddress.value = addr
 }
 
-// 新增地址
+// add address
 function addAddress() {
   api.post(`user/address/`, newAddress.value, {
     headers: { 'Content-Type': 'application/json' }
