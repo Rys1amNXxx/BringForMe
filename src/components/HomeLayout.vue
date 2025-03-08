@@ -161,7 +161,7 @@ import api from '@/api.js'
 import defaultAvatar from '@/assets/avatar/defaultAvatar.jpeg'
 import _ from 'lodash'
 const currentUserId = parseInt(localStorage.getItem('userId') || '0', 10)
-const backendBaseUrl = 'http://localhost:8000'
+const backendBaseUrl = 'http://150.158.16.206:5000'
 
 // uploadHeaders for image upload
 const uploadHeaders = {

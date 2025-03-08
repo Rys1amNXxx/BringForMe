@@ -3,24 +3,57 @@
 </template>
 
 <script setup>
-import { onMounted, provide } from 'vue'
+import { onMounted, provide, onBeforeUnmount } from 'vue'
 import { userStore } from '@/store/user.js'
+import api from '@/api.js'
+
+
+let tokenRefreshInterval = null
+
+function refreshToken() {
+  const storedRefreshToken = localStorage.getItem('refreshToken')
+  if (!storedRefreshToken) {
+    console.error('No refresh token available.')
+    return
+  }
+  api.post('user/token/refresh/', { refresh: storedRefreshToken })
+    .then((res) => {
+      // 假设后端返回 { access: '...', refresh: '...' }
+      if (res.data.access) {
+        localStorage.setItem('accessToken', res.data.access)
+        if (res.data.refresh) {
+          localStorage.setItem('refreshToken', res.data.refresh)
+        }
+        console.log('Token refreshed successfully')
+      } else {
+        console.error('Token refresh failed')
+      }
+    })
+    .catch((err) => {
+      console.error('Error during token refresh:', err)
+    })
+}
 
 onMounted(() => {
   const storedUserProfile = localStorage.getItem('userProfile')
   if (storedUserProfile) {
     try {
       userStore.profile = JSON.parse(storedUserProfile)
-      // 将解析后的数据合并到全局状态 userStore 中
       console.log('Restored user profile:', userStore.profile)
     } catch (e) {
       console.error('解析用户数据失败：', e)
     }
   }
+  provide('user', userStore)
+  tokenRefreshInterval = setInterval(refreshToken, 5 * 60 * 1000)
 })
 
-// 提供全局用户状态
-provide('user', userStore)
+onBeforeUnmount(() => {
+  if (tokenRefreshInterval) {
+    clearInterval(tokenRefreshInterval)
+  }
+})
+
 </script>
 <style>
 html,
