@@ -17,7 +17,7 @@
         </el-form-item>
         <el-form-item label="Password" prop="password">
           <el-input type="password" v-model="registerForm.password" placeholder="Enter your password"></el-input>
-          <p style="font-size: smaller;color: lightgray;">The password must contain lowercase and uppercase letters, numbers, and special characters.</p>
+          <p class="passwordTips">The password must contain lowercase and uppercase letters, numbers, and special characters.</p>
         </el-form-item>
         <el-form-item label="Confirm Password" prop="confirmPassword">
           <el-input type="password" v-model="registerForm.confirmPassword"
@@ -35,7 +35,7 @@
         <el-form-item label="Last Name">
           <el-input v-model="registerForm.lastname" placeholder="Enter your last name"></el-input>
         </el-form-item>
-        <el-form-item label="Countrycode">
+        <el-form-item label="Countrycode" prop="countryCode">
           <el-input v-model="registerForm.countryCode"></el-input>
         </el-form-item>
         <el-form-item>
@@ -65,7 +65,7 @@ const registerForm = reactive({
   phoneNumber: '',
   firstname: '',
   lastname: '',
-  contryCode:''
+  countryCode:'44'
 })
 
 const registerFormRef = ref(null)

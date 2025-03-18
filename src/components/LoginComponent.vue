@@ -45,29 +45,6 @@ const rules = {
   password: [{ required: true, message: 'Please input your password', trigger: 'blur' }]
 }
 
-function refreshToken() {
-  const storedRefreshToken = localStorage.getItem('refreshToken')
-  if (!storedRefreshToken) {
-    console.error('No refresh token available.')
-    return
-  }
-  api.post('user/token/refresh/', { refresh: storedRefreshToken })
-    .then((res) => {
-      // 假设后端返回 { access: '...', refresh: '...' }
-      if (res.data.access) {
-        localStorage.setItem('accessToken', res.data.access)
-        if (res.data.refresh) {
-          localStorage.setItem('refreshToken', res.data.refresh)
-        }
-        console.log('Token refreshed successfully')
-      } else {
-        console.error('Token refresh failed')
-      }
-    })
-    .catch((err) => {
-      console.error('Error during token refresh:', err)
-    })
-}
 
 async function handleLogin() {
   // use validate() method to validate the form
@@ -99,7 +76,7 @@ async function handleLogin() {
         }
         
         //  refresh token every 5 minutes
-        setInterval(refreshToken, 1000 * 60 * 5)
+        // setInterval(refreshToken, 1000 * 60 * 5)
 
         // get user profile
         // const userId = localStorage.getItem('userId')

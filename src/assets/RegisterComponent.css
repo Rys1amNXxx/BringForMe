@@ -31,3 +31,8 @@
   width: 50px;
   height: 50px;
 }
+
+.passwordTips{
+  font-size: smaller;
+  color: lightgray;
+}

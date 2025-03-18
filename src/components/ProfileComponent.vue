@@ -9,7 +9,7 @@
       <div class="avatar-section">
         <el-avatar :size="100" :src="user.profile.avatar || default_avatar" class="avatar" />
         <el-upload 
-        action="/api/v1/media-manager/image/" 
+        :http-request="uploadAvatar"
         :show-file-list="false" 
         :on-success="handleAvatarSuccess"
         :before-upload="beforeAvatarUpload" 
@@ -122,6 +122,7 @@ onMounted(() => {
     editForm.value.email = user.profile.email || ''
   }
 })
+
 
 
 // save edited profile
